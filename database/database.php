@@ -61,8 +61,7 @@
 			if(count($columns) == 0){
 				$format_columns = "*";
 			}else{
-				// implode = join
-				$format_columns = implode(",", $columns);
+				$format_columns = join(",", $columns);
 			}
 			
 			$this->sql = "SELECT $format_columns FROM $table LIMIT $n_limit";
@@ -148,9 +147,8 @@
 				$prepare_array[":$key"] = $value;
 			}
 			
-			// implode = join
-			$columns = implode(",", $tmp_col);
-			$data = implode(",", $tmp_dat);
+			$columns = join(",", $tmp_col);
+			$data = join(",", $tmp_dat);
 			echo "<p>columns: $columns</p>";
 			echo "<p>data: $data</p>";
 			echo "<p>prepare_array: $prepare_array</p>";
@@ -162,68 +160,6 @@
 			
 			// $prepare_array = {":KEY1": [value1, value2, value3], ":KEY2": [value1, value2, value3]}
 			$result->execute($prepare_array);
-			
-			$this->last_id = $this->db->lastInsertId();
-		}
-		
-		public function insertPrepareColumns($table, $data){
-			$temp = array();
-		
-			foreach($data as $key => $value){
-				$temp[] = $key;
-			}
-			
-			// implode = join
-			$columns = implode(",", $temp);
-			$sql_prepare = "INSERT INTO $table ( $columns ) VALUES ";
-			
-			return $sql_prepare;
-		}
-		
-		public function insertPrepareValues($data, $index){
-			// (:house_id_{$n},:room_name_{$n},:monthly_rental_amount_{$n},:security_deposit_amount_{$n},:room_floor_{$n})
-			$temp = array();
-		
-			foreach($data as $key => $value){
-				$temp[] = ":$key" . "_" . $index;
-			}
-			
-			// implode = join
-			$values = implode(",", $temp);
-			$values_prepare = "($values)";
-			
-			return $values_prepare;
-		}
-		
-		public function insertPrepareDatas($data_array, $data, $index){
-			$temp = array();
-		
-			foreach($data as $key => $value){
-				// $dataAdd[':house_id_'.$n] = $_d['house_id'];
-				$data_array[":$key" . "_" . $index] = $value;
-			}
-			
-			return $data_array;
-		}
-		
-		public function insert_($table, $datas) {
-			$sql_prepare = $this->insertPrepareColumns($table, $datas[0]);
-			$n_data = count($datas);
-			$values_prepare_list = array();
-			$data_array = array();
-			
-			for ($i = 0; $i < $n_data; $i++) {
-			  $data = $datas[$i];
-			  $values_prepare_list[] = $this->insertPrepareValues($data, $i);
-			  $data_array = $this->insertPrepareDatas($data_array, $data, $i);
-			}
-			
-			// INSERT INTO table_name (KEY1, KEY2) VALUES (:KEY1, :KEY2), (:KEY1, :KEY2), (:KEY1, :KEY2);
-			$this->sql = $sql_prepare . implode(",", $values_prepare_list);
-			echo "<p>sql: $this->sql</p>";
-			print json_encode($data_array);
-			$result = $this->db->prepare($this->sql);
-			$result->execute($data_array);
 			
 			$this->last_id = $this->db->lastInsertId();
 		}
@@ -250,8 +186,7 @@
 				$setting_list[] = "$key=:$key";
 			}
 			
-			// implode = join
-			$setting = implode(",", $setting_list);
+			$setting = join(",", $setting_list);
 			echo "<p>setting: $setting</p>";
 			
 			// for ($xx = 0; $xx < count($data_array); $xx++) {
@@ -275,25 +210,10 @@
 		/**
 		 * 這段可以刪除資料庫中的資料
 		 */
-		public function delete($table, $data_array) {
-			$where = array();
-			
-			foreach ($data_array as $key => $value) {				
-				$where_list[] = "$key=:$key";
-			}
-			
-			// implode = join
-			$where = implode(",", $where_list);
-			echo "<p>$where: $where</p>";
-			
-			$result = json_encode($where);
-			echo "<p>where: $result</p>";
-			
-			$this->sql = "DELETE FROM $table WHERE $where";
-			echo "<p>sql: $this->sql</p>";
-			
+		public function delete($table, $key, $value) {
+			$this->sql = "DELETE FROM $table WHERE $key = :$key";
 			$result = $this->db->prepare($this->sql);
-			$result->execute($data_array);
+			$result->execute(array(":$key" => $value));
 		}
 
 		/**

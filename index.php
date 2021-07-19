@@ -10,11 +10,19 @@
 			include "database.php";
 			$db = connectToStockData();
 			// $db->insert("STOCK_LIST", array("STOCK_ID"=> "2330", "NAME"=> "", "PRICE"=> "614.00"));
-			$db->update("STOCK_LIST", array("STOCK_ID"=> "2330", "NAME"=> "台積電", "PRICE"=> "615.00"), "STOCK_ID", "2330");
+			// $db->update("STOCK_LIST", array("STOCK_ID"=> "2330", "NAME"=> "台積電", "PRICE"=> "615.00"), "STOCK_ID", "2330");
+			
+			$datas = array(
+				array("STOCK_ID"=> "2330", "NAME"=> "台積電", "PRICE"=> "615.00"),
+				array("STOCK_ID"=> "5880", "NAME"=> "合庫金", "PRICE"=> "21.60")
+			);
+			
+			$db->insert_("STOCK_LIST", $datas);
 			
 			$result = $db->select("STOCK_LIST");
 			$json_result = json_encode($result);
-			echo "<p>$json_result</p>";
+			echo "<p>$json_result</p>";			
+			
 		?>
     </body>
 </html>
