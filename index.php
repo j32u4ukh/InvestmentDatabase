@@ -8,20 +8,18 @@
         <p>// TODO: 各個投資者利用帳密可登入個別頁面，看到自己的資金變化</p>
 		<?php
 			include "database.php";
-			$db = connectToStockData();
-			// $db->insert("STOCK_LIST", array("STOCK_ID"=> "2330", "NAME"=> "", "PRICE"=> "614.00"));
-			// $db->update("STOCK_LIST", array("STOCK_ID"=> "2330", "NAME"=> "台積電", "PRICE"=> "615.00"), "STOCK_ID", "2330");
+			// $db = connectToStockData();
+			// $sql = "CREATE TABLE `id17236763_stock_data`.`DAY_05880` ( 
+					// `TIME` VARCHAR(10) NOT NULL , 
+					// `OPEN` VARCHAR(10) NOT NULL , 
+					// `HIGH` VARCHAR(10) NOT NULL , 
+					// `LOW` VARCHAR(10) NOT NULL , 
+					// `CLOSE` VARCHAR(10) NOT NULL , 
+					// `VOL` INT(10) NOT NULL , 
+					// PRIMARY KEY (`TIME`(10))
+					// ) ENGINE = InnoDB;";
+			// $db->execute($sql);		
 			
-			$datas = array(
-				array("STOCK_ID"=> "2330", "NAME"=> "台積電", "PRICE"=> "615.00"),
-				array("STOCK_ID"=> "5880", "NAME"=> "合庫金", "PRICE"=> "21.60")
-			);
-			
-			$db->insert_("STOCK_LIST", $datas);
-			
-			$result = $db->select("STOCK_LIST");
-			$json_result = json_encode($result);
-			echo "<p>$json_result</p>";			
 			
 		?>
     </body>

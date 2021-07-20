@@ -1,35 +1,44 @@
 <?php
-	function connectToStockData(){
-		$server = "localhost";
-		$user = "id17236763_j32u4ukh";
-		$password = ">_AJeTJOD#bH_l2(";
-		$database = "id17236763_stock_data";		
-		$database = new Database("localhost", "id17236763_j32u4ukh", ">_AJeTJOD#bH_l2(", "id17236763_stock_data");
+	function connectAccess(){
+		$keys = array("server", "user", "password", "database");
+		$file = fopen("access.txt", "r");	
+		$access = array();			
+		$i = 0;
 		
-		return $database;
+		//輸出文字中所有的行，直到檔案結束為止。
+		while(! feof($file))
+		{
+			$access[$keys[$i]] = fgets($file);
+			$i++;
+		}
+		
+		fclose($file);
+		
+		return $access;
 	}
 	
 	// 參考：https://ithelp.ithome.com.tw/articles/10195426
 	class Database{
-		private $db = NULL;
+		protected $database = null;
+		protected $db = null;
 		
-		private $sql = "";
-		private $last_id = 0;
-		private $last_num_rows = 0;
-		private $error_message = "";
+		protected $sql = "";
+		protected $last_id = 0;
+		protected $last_num_rows = 0;
+		protected $error_message = "";
 		
 		// 『建構式』會在物件被 new 時自動執行
 		public function __construct($server, $user, $password, $database){
+			$this->$database = $database;
 			$this->connectPDO($server, $user, $password, $database);
 		}
 		
 		public function __destruct() {
-			print "Destroying\n";
 			$this->db = NULL;
 		}
 		
 		// 建立跟資料庫的連接，並設定語系是萬國語言以支援中文
-		private function connectPDO($server, $user, $password, $database){		
+		protected function connectPDO($server, $user, $password, $database){		
 			try {
 				$this->db = new PDO("mysql:host=$server; charset=utf8mb4; dbname=$database", $user, $password);
 
@@ -43,10 +52,16 @@
 			}
 		}
 		
-		public function execute($sql, $data_array) {
+		public function execute($sql, $data_array=array()) {
 			try {
+				$this->sql = $sql;
 				$result = $this->db->prepare($sql);
-				$result->execute($data_array);
+				
+				if(count($data_array) == 0){
+					$result->execute();
+				}else{
+					$result->execute($data_array);
+				}
 				
 				return $result->fetchAll(); 
 				
@@ -56,12 +71,26 @@
 			}
 		}
 		
+		public function getTable($table, $table_definition){
+			/* 若該表格不存在，則建立表格
+			
+			:param table_name: 表格名稱
+			:param table_definition: 表格定義
+			:return: 
+			*/
+			$this->sql = "CREATE TABLE IF NOT EXISTS {$table} ({$table_definition});"
+			$this->execute($this->sql);
+		}
+		
+		// TODO: 檢查資料表是否存在 https://stackoverflow.com/questions/1717495/check-if-a-database-table-exists-using-php-pdo
+		
 		// 自己實作的讀取資料庫
 		public function select($table, $columns=array(), $n_limit=5){
 			if(count($columns) == 0){
 				$format_columns = "*";
 			}else{
-				$format_columns = join(",", $columns);
+				// implode = join
+				$format_columns = implode(",", $columns);
 			}
 			
 			$this->sql = "SELECT $format_columns FROM $table LIMIT $n_limit";
@@ -78,7 +107,7 @@
 		}
 		
 		/**
-		 * 這段用來讀取資料庫中的資料，回傳的是陣列資料
+		 * query 提供較大的彈性來讀取資料庫，但我目前還沒使用到，因此還沒維護
 		 */
 		public function query($table, $condition=array(), $order_by="DESC", $fields="*", $n_limit=5){
 			if(empty($table)){
@@ -124,42 +153,69 @@
 				$this->error_message = "<p class='bg-danger'> $e->getMessage() </p>";
 			}
 		}
-
-		/**
-		 * 這段可以新增資料庫中的資料，並把最後一筆的 ID 存到變數中，可以用 getLastId() 取出
-		 目前查到的資訊是 PDO 無法同時多筆寫入，待確認
-		 */
-		public function insert($table = null, $data_array = array()) {
-			if($table === null){
-				return false;
+		
+		// 為 INSERT 準備 sql 指令與欄位
+		public function insertPrepareColumns($table, $data){
+			$temp = array();
+		
+			foreach($data as $key => $value){
+				$temp[] = $key;
 			}
 			
-			if(count($data_array) == 0){
-				return false;
-			}
-
-			$tmp_col = array();
-			$tmp_dat = array();
-
-			foreach ($data_array as $key => $value) {
-				$tmp_col[] = $key;
-				$tmp_dat[] = ":$key";
-				$prepare_array[":$key"] = $value;
+			// implode = join
+			$columns = implode(",", $temp);
+			$sql_prepare = "INSERT INTO $table ( $columns ) VALUES ";
+			
+			return $sql_prepare;
+		}
+		
+		// 為 INSERT 準備 Value 要插入的空格
+		public function insertPrepareValues($data, $index){
+			// (:house_id_{$n},:room_name_{$n},:monthly_rental_amount_{$n},:security_deposit_amount_{$n},:room_floor_{$n})
+			$temp = array();
+		
+			foreach($data as $key => $value){
+				$temp[] = ":$key" . "_" . $index;
 			}
 			
-			$columns = join(",", $tmp_col);
-			$data = join(",", $tmp_dat);
-			echo "<p>columns: $columns</p>";
-			echo "<p>data: $data</p>";
-			echo "<p>prepare_array: $prepare_array</p>";
+			// implode = join
+			$values = implode(",", $temp);
+			$values_prepare = "($values)";
 			
-			// INSERT INTO table_name (KEY1, KEY2) VALUES (:KEY1, :KEY2);
-			$this->sql = "INSERT INTO $table ( $columns ) VALUES ( $data )";
+			return $values_prepare;
+		}
+		
+		// 為 INSERT 準備要插入的 Value 實際內容
+		public function insertPrepareDatas($data_array, $data, $index){
+			$temp = array();
+		
+			foreach($data as $key => $value){
+				// $dataAdd[':house_id_'.$n] = $_d['house_id'];
+				$data_array[":$key" . "_" . $index] = $value;
+			}
+			
+			return $data_array;
+		}
+		
+		// 呼叫一次，可插入一到多筆數據
+		public function insert($table, $datas) {
+			$sql_prepare = $this->insertPrepareColumns($table, $datas[0]);
+			$n_data = count($datas);
+			$values_prepare_list = array();
+			$data_array = array();
+			
+			for ($i = 0; $i < $n_data; $i++) {
+			  $data = $datas[$i];
+			  $values_prepare_list[] = $this->insertPrepareValues($data, $i);
+			  $data_array = $this->insertPrepareDatas($data_array, $data, $i);
+			}
+			
+			// INSERT INTO table_name (KEY1, KEY2) VALUES (:KEY1, :KEY2), (:KEY1, :KEY2), (:KEY1, :KEY2);
+			$this->sql = $sql_prepare . implode(",", $values_prepare_list);
 			echo "<p>sql: $this->sql</p>";
+			print json_encode($data_array);
 			$result = $this->db->prepare($this->sql);
-			
-			// $prepare_array = {":KEY1": [value1, value2, value3], ":KEY2": [value1, value2, value3]}
-			$result->execute($prepare_array);
+			$result->execute($data_array);
 			
 			$this->last_id = $this->db->lastInsertId();
 		}
@@ -172,10 +228,6 @@
 				return false;
 			}
 			
-			// if($id == null){
-				// return false;
-			// }
-						
 			$setting_list = array();
 			
 			foreach ($data_array as $key => $value) {
@@ -186,20 +238,10 @@
 				$setting_list[] = "$key=:$key";
 			}
 			
-			$setting = join(",", $setting_list);
+			// implode = join
+			$setting = implode(",", $setting_list);
 			echo "<p>setting: $setting</p>";
-			
-			// for ($xx = 0; $xx < count($data_array); $xx++) {
-				// list($key, $value) = each($data_array);
-				// $setting_list .= $key . "=" . ':'.$key;
-				// $setting_list .= "$key=:$key";
-				
-				// if ($xx != count($data_array) - 1){
-					// $setting_list .= ",";
-				// }
-			// }
-			
-			// $data_array[$key_column] = $value;
+
 			$this->sql = "UPDATE $table SET $setting WHERE $key_column = :$key_column";
 			echo "<p>sql: $this->sql</p>";
 			
@@ -210,10 +252,25 @@
 		/**
 		 * 這段可以刪除資料庫中的資料
 		 */
-		public function delete($table, $key, $value) {
-			$this->sql = "DELETE FROM $table WHERE $key = :$key";
+		public function delete($table, $data_array) {
+			$where = array();
+			
+			foreach ($data_array as $key => $value) {				
+				$where_list[] = "$key=:$key";
+			}
+			
+			// implode = join
+			$where = implode(",", $where_list);
+			echo "<p>$where: $where</p>";
+			
+			$result = json_encode($where);
+			echo "<p>where: $result</p>";
+			
+			$this->sql = "DELETE FROM $table WHERE $where";
+			echo "<p>sql: $this->sql</p>";
+			
 			$result = $this->db->prepare($this->sql);
-			$result->execute(array(":$key" => $value));
+			$result->execute($data_array);
 		}
 
 		/**
@@ -225,43 +282,13 @@
 		}
 
 		/**
-		 * @param string $sql
-		 * 這段是把執行的語法存到變數裡，設定成 private 只有內部可以使用，外部無法呼叫
-		 */
-		private function setLastSql($sql) {
-			$this->sql = $sql;
-		}
-
-		/**
 		 * @return int
 		 * 主要功能是把新增的 ID 傳到物件外面
 		 */
 		public function getLastId() {
 			return $this->last_id;
 		}
-
-		/**
-		 * @param int $last_id
-		 * 把這個 $last_id 存到物件內的變數
-		 */
-		private function setLastId($last_id) {
-			$this->last_id = $last_id;
-		}
-
-		/**
-		 * @return int
-		 */
-		public function getLastNumRows() {
-			return $this->last_num_rows;
-		}
-
-		/**
-		 * @param int $last_num_rows
-		 */
-		private function setLastNumRows($last_num_rows) {
-			$this->last_num_rows = $last_num_rows;
-		}
-
+		
 		/**
 		 * @return string
 		 * 取出物件內的錯誤訊息
@@ -269,14 +296,6 @@
 		public function getErrorMessage()
 		{
 			return $this->error_message;
-		}
-
-		/**
-		 * @param string $error_message
-		 * 記下錯誤訊息到物件變數內
-		 */
-		private function setErrorMessage($error_message){
-			$this->error_message = $error_message;
 		}
 	}
 ?>

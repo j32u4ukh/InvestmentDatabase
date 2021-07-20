@@ -43,10 +43,16 @@
 			}
 		}
 		
-		public function execute($sql, $data_array) {
+		public function execute($sql, $data_array=array()) {
 			try {
+				$this->sql = $sql;
 				$result = $this->db->prepare($sql);
-				$result->execute($data_array);
+				
+				if(count($data_array) == 0){
+					$result->execute();
+				}else{
+					$result->execute($data_array);
+				}
 				
 				return $result->fetchAll(); 
 				
@@ -79,7 +85,7 @@
 		}
 		
 		/**
-		 * 這段用來讀取資料庫中的資料，回傳的是陣列資料
+		 * query 提供較大的彈性來讀取資料庫，但我目前還沒使用到，因此還沒維護
 		 */
 		public function query($table, $condition=array(), $order_by="DESC", $fields="*", $n_limit=5){
 			if(empty($table)){
@@ -125,47 +131,8 @@
 				$this->error_message = "<p class='bg-danger'> $e->getMessage() </p>";
 			}
 		}
-
-		/**
-		 * 這段可以新增資料庫中的資料，並把最後一筆的 ID 存到變數中，可以用 getLastId() 取出
-		 目前查到的資訊是 PDO 無法同時多筆寫入，待確認
-		 */
-		public function insert($table = null, $data_array = array()) {
-			if($table === null){
-				return false;
-			}
-			
-			if(count($data_array) == 0){
-				return false;
-			}
-
-			$tmp_col = array();
-			$tmp_dat = array();
-
-			foreach ($data_array as $key => $value) {
-				$tmp_col[] = $key;
-				$tmp_dat[] = ":$key";
-				$prepare_array[":$key"] = $value;
-			}
-			
-			// implode = join
-			$columns = implode(",", $tmp_col);
-			$data = implode(",", $tmp_dat);
-			echo "<p>columns: $columns</p>";
-			echo "<p>data: $data</p>";
-			echo "<p>prepare_array: $prepare_array</p>";
-			
-			// INSERT INTO table_name (KEY1, KEY2) VALUES (:KEY1, :KEY2);
-			$this->sql = "INSERT INTO $table ( $columns ) VALUES ( $data )";
-			echo "<p>sql: $this->sql</p>";
-			$result = $this->db->prepare($this->sql);
-			
-			// $prepare_array = {":KEY1": [value1, value2, value3], ":KEY2": [value1, value2, value3]}
-			$result->execute($prepare_array);
-			
-			$this->last_id = $this->db->lastInsertId();
-		}
 		
+		// 為 INSERT 準備 sql 指令與欄位
 		public function insertPrepareColumns($table, $data){
 			$temp = array();
 		
@@ -180,6 +147,7 @@
 			return $sql_prepare;
 		}
 		
+		// 為 INSERT 準備 Value 要插入的空格
 		public function insertPrepareValues($data, $index){
 			// (:house_id_{$n},:room_name_{$n},:monthly_rental_amount_{$n},:security_deposit_amount_{$n},:room_floor_{$n})
 			$temp = array();
@@ -195,6 +163,7 @@
 			return $values_prepare;
 		}
 		
+		// 為 INSERT 準備要插入的 Value 實際內容
 		public function insertPrepareDatas($data_array, $data, $index){
 			$temp = array();
 		
@@ -206,7 +175,8 @@
 			return $data_array;
 		}
 		
-		public function insert_($table, $datas) {
+		// 呼叫一次，可插入一到多筆數據
+		public function insert($table, $datas) {
 			$sql_prepare = $this->insertPrepareColumns($table, $datas[0]);
 			$n_data = count($datas);
 			$values_prepare_list = array();
@@ -236,10 +206,6 @@
 				return false;
 			}
 			
-			// if($id == null){
-				// return false;
-			// }
-						
 			$setting_list = array();
 			
 			foreach ($data_array as $key => $value) {
@@ -253,18 +219,7 @@
 			// implode = join
 			$setting = implode(",", $setting_list);
 			echo "<p>setting: $setting</p>";
-			
-			// for ($xx = 0; $xx < count($data_array); $xx++) {
-				// list($key, $value) = each($data_array);
-				// $setting_list .= $key . "=" . ':'.$key;
-				// $setting_list .= "$key=:$key";
-				
-				// if ($xx != count($data_array) - 1){
-					// $setting_list .= ",";
-				// }
-			// }
-			
-			// $data_array[$key_column] = $value;
+
 			$this->sql = "UPDATE $table SET $setting WHERE $key_column = :$key_column";
 			echo "<p>sql: $this->sql</p>";
 			
@@ -305,43 +260,13 @@
 		}
 
 		/**
-		 * @param string $sql
-		 * 這段是把執行的語法存到變數裡，設定成 private 只有內部可以使用，外部無法呼叫
-		 */
-		private function setLastSql($sql) {
-			$this->sql = $sql;
-		}
-
-		/**
 		 * @return int
 		 * 主要功能是把新增的 ID 傳到物件外面
 		 */
 		public function getLastId() {
 			return $this->last_id;
 		}
-
-		/**
-		 * @param int $last_id
-		 * 把這個 $last_id 存到物件內的變數
-		 */
-		private function setLastId($last_id) {
-			$this->last_id = $last_id;
-		}
-
-		/**
-		 * @return int
-		 */
-		public function getLastNumRows() {
-			return $this->last_num_rows;
-		}
-
-		/**
-		 * @param int $last_num_rows
-		 */
-		private function setLastNumRows($last_num_rows) {
-			$this->last_num_rows = $last_num_rows;
-		}
-
+		
 		/**
 		 * @return string
 		 * 取出物件內的錯誤訊息
@@ -349,14 +274,6 @@
 		public function getErrorMessage()
 		{
 			return $this->error_message;
-		}
-
-		/**
-		 * @param string $error_message
-		 * 記下錯誤訊息到物件變數內
-		 */
-		private function setErrorMessage($error_message){
-			$this->error_message = $error_message;
 		}
 	}
 ?>
