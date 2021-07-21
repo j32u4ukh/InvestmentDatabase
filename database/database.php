@@ -1,14 +1,14 @@
 <?php
 	function connectAccess(){
 		$keys = array("server", "user", "password", "database");
-		$file = fopen("access.txt", "r");	
+		$file = fopen("database/access.txt", "r");	
 		$access = array();			
 		$i = 0;
 		
 		//輸出文字中所有的行，直到檔案結束為止。
 		while(! feof($file))
 		{
-			$access[$keys[$i]] = fgets($file);
+			$access[$keys[$i]] = trim(fgets($file));
 			$i++;
 		}
 		
@@ -21,6 +21,7 @@
 	class Database{
 		protected $database = null;
 		protected $db = null;
+		protected $table = null;
 		
 		protected $sql = "";
 		protected $last_id = 0;
@@ -29,7 +30,7 @@
 		
 		// 『建構式』會在物件被 new 時自動執行
 		public function __construct($server, $user, $password, $database){
-			$this->$database = $database;
+			$this->database = $database;
 			$this->connectPDO($server, $user, $password, $database);
 		}
 		
@@ -52,6 +53,17 @@
 			}
 		}
 		
+		public function getTable($table, $table_definition){
+			/* 若該表格不存在，則建立表格
+			
+			:param table_name: 表格名稱
+			:param table_definition: 表格定義
+			:return: 
+			*/
+			$this->sql = "CREATE TABLE IF NOT EXISTS `$this->database`.`$table` ({$table_definition}) ENGINE = InnoDB;";
+			$this->execute($this->sql);
+		}
+		
 		public function execute($sql, $data_array=array()) {
 			try {
 				$this->sql = $sql;
@@ -71,21 +83,14 @@
 			}
 		}
 		
-		public function getTable($table, $table_definition){
-			/* 若該表格不存在，則建立表格
-			
-			:param table_name: 表格名稱
-			:param table_definition: 表格定義
-			:return: 
-			*/
-			$this->sql = "CREATE TABLE IF NOT EXISTS {$table} ({$table_definition});"
-			$this->execute($this->sql);
-		}
-		
 		// TODO: 檢查資料表是否存在 https://stackoverflow.com/questions/1717495/check-if-a-database-table-exists-using-php-pdo
 		
 		// 自己實作的讀取資料庫
-		public function select($table, $columns=array(), $n_limit=5){
+		public function select($table=null, $columns=array(), $n_limit=5){
+			if($table === null){
+				$table = $this->table;
+			}
+			
 			if(count($columns) == 0){
 				$format_columns = "*";
 			}else{
