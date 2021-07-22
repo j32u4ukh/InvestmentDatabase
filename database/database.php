@@ -1,4 +1,6 @@
 <?php
+	include_once "utils.php";
+	
 	function connectAccess(){
 		$keys = array("server", "user", "password", "database");
 		$file = fopen("database/access.txt", "r");	
@@ -61,6 +63,8 @@
 			:return: 
 			*/
 			$this->sql = "CREATE TABLE IF NOT EXISTS `$this->database`.`$table` ({$table_definition}) ENGINE = InnoDB;";
+			print "<p>getTable sql: $this->sql</p>";
+			debugLog();
 			$this->execute($this->sql);
 		}
 		
@@ -99,6 +103,7 @@
 			}
 			
 			$this->sql = "SELECT $format_columns FROM $table LIMIT $n_limit";
+			debugLog($this->sql);
 			
 			try {
 				$result = $this->db->prepare($this->sql);
