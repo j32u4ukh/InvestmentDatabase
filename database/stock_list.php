@@ -2,6 +2,7 @@
 	include_once "database/database.php";
 	include_once "utils.php";
 	
+	// TODO: sortStockWithPrice, selectByPriceRange, selectByStockIds, updateByStockId, isStockExists
 	class StockList extends Database{
 	    
 		// 建構子從 access.txt 讀取連接資料庫所需資訊
