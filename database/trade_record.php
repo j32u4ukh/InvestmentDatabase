@@ -47,7 +47,7 @@
 		
 		// [TradeRecord] 為 INSERT 準備 Value 要插入的空格
 		public function insertValues($data, $index){
-			// (:house_id_{$n},:room_name_{$n},:monthly_rental_amount_{$n},:security_deposit_amount_{$n},:room_floor_{$n})
+			// TradeRecord 的第一個欄位為 auto increment，無須自己給值就會自動遞增，指令上要傳入 NULL
 			$temp = array("NULL");
 		
 			foreach($data as $key => $value){
@@ -63,16 +63,16 @@
 			return $values_prepare;
 		}
 		
-		public function add(){
-			$datas = array(
-				array(	"STOCK_ID"=>"2012", "BUY_TIME"=>"2021-03-23", "SELL_TIME"=>"2021-04-23", 
-						"BUY_PRICE"=>"19.95", "SELL_PRICE"=>"25.10", "VOL"=>"1", 
-						"BUY_COST"=>"19970.00", "SELL_COST"=>"95", "REVENUE"=>"5232.00"),
-				array(	"STOCK_ID"=>"2012", "BUY_TIME"=>"2021-03-24", "SELL_TIME"=>"2021-04-21", 
-						"BUY_PRICE"=>"0", "SELL_PRICE"=>"0", "VOL"=>"0", 
-						"BUY_COST"=>"0", "SELL_COST"=>"0", "REVENUE"=>"590"),
+		public function insert($datas){
+			// $datas = array(
+				// array(	"STOCK_ID"=>"2012", "BUY_TIME"=>"2021-03-23", "SELL_TIME"=>"2021-04-23", 
+						// "BUY_PRICE"=>"19.95", "SELL_PRICE"=>"25.10", "VOL"=>"1", 
+						// "BUY_COST"=>"19970.00", "SELL_COST"=>"95", "REVENUE"=>"5232.00"),
+				// array(	"STOCK_ID"=>"2012", "BUY_TIME"=>"2021-03-24", "SELL_TIME"=>"2021-04-21", 
+						// "BUY_PRICE"=>"0", "SELL_PRICE"=>"0", "VOL"=>"0", 
+						// "BUY_COST"=>"0", "SELL_COST"=>"0", "REVENUE"=>"590"),
 				
-			);
+			// );
 			
 			$n_data = count($datas);
 			$values_array = array();
