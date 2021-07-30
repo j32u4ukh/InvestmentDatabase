@@ -92,7 +92,7 @@
 			formatLog("values: $values");
 			print json_encode($data_array);
 							
-			$this->sql = "INSERT INTO `TRADE_RECORD` 
+			$this->sql = "INSERT IGNORE INTO `TRADE_RECORD` 
 			(`NUMBER`, `STOCK_ID`, `BUY_TIME`, `SELL_TIME`, `BUY_PRICE`, `SELL_PRICE`, `VOL`, `BUY_COST`, `SELL_COST`, `REVENUE`)
 			VALUES $values;";
 			formatLog("sql: $this->sql");

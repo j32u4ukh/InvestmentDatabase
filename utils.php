@@ -14,10 +14,10 @@
 		    $class = trim($backtrace[1]["class"]);
 		    $method = trim($backtrace[1]["function"]);
 		    
-		    print "<script>console.log('[$class] $method | " . $msg . " ($line)')</script>";
+		    echo "<script>console.log('[$class] $method | " . $msg . " ($line)')</script>";
 		}else{
 		    $method = trim($backtrace[0]["function"]);
-		    print "<script>console.log('[] $method | " . $msg . " ($line)')</script>";
+		    echo "<script>console.log('[] $method | " . $msg . " ($line)')</script>";
 		}
 	}
 ?>

@@ -10,8 +10,8 @@
 			include_once "database/trade_record.php";
 			include_once "utils.php";
 
-			$db = new TradeRecord();
-			$db->add();
+			// $db = new TradeRecord();
+			// $db->add();
 		?>
     </body>
 </html>

@@ -1,5 +1,15 @@
 # InvestmentDatabase
+
 將投資相關數據獨立提供與維護
+
+## REST 操作
+
+url: /api/sources/
+
+* GET: 取得數據
+* POST: 寫入數據
+* PUT: 更新數據
+* DELETE: 刪除數據
 
 ## TABLE: STOCK_LIST
 
