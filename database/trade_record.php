@@ -29,6 +29,8 @@
 								 `SELL_COST` VARCHAR(10) NOT NULL , 
 								 `REVENUE` VARCHAR(10) NOT NULL , 
 								 PRIMARY KEY (`NUMBER`)";
+			$this->sql_columns = array("NUMBER", "STOCK_ID", "BUY_TIME", "SELL_TIME", "BUY_PRICE", "SELL_PRICE", "VOL", 
+									   "BUY_COST", "SELL_COST", "REVENUE");
 			parent::getTable($this->table, $table_definition);
 		}
 		
@@ -63,7 +65,7 @@
 			return $values_prepare;
 		}
 		
-		public function insert($datas){
+		public function insert($datas, $table=null){
 			// $datas = array(
 				// array(	"STOCK_ID"=>"2012", "BUY_TIME"=>"2021-03-23", "SELL_TIME"=>"2021-04-23", 
 						// "BUY_PRICE"=>"19.95", "SELL_PRICE"=>"25.10", "VOL"=>"1", 
@@ -102,6 +104,75 @@
 			
 			$this->last_id = $this->db->lastInsertId();
 			formatLog("last_id: $this->last_id");
+		}
+		
+		public function query($table=null, $columns=null, $where=null, $sort_by=null, $sort_type="DESC", $limit=null, $offset=0){
+			/*將 table_name 結果按 column_name [ 升序 | 降序 ] 排序
+			SELECT *
+			FROM table_name
+			TODO: WHERE [ conditions1 AND conditions2 ]
+			ORDER BY column_name [ASC | DESC];
+
+			:param table_name: 表格名稱
+			:param columns: 欄位名稱
+			:param where: 篩選條件
+			:param sort_by: 排須依據哪些欄位
+			:param sort_type: 升序(ASC) | 降序(DESC)
+			:param limit: 限制從表格中提取的行數
+			:param offset: 從第幾筆數據開始呈現(從 0 開始數)
+			:return:
+			*/			
+			$format_columns = $this->formatColumns($columns);
+			
+			if(is_null($where)){
+				$where = "";
+			}else{
+				$where = "WHERE $where";
+			}
+			
+			if(is_null($sort_by)){
+				$sort = "";
+			}else{
+				$sort = "ORDER BY $sort_by $sort_type";
+			}
+			
+			// LIMIT & OFFSET 似乎必須一起使用
+			if(is_null($limit)){
+				$limit_offset = "";
+			}else{
+				$limit_offset = "LIMIT $limit OFFSET $offset";
+			}
+			
+			$this->sql = "SELECT $format_columns FROM $this->table $where $sort $limit_offset";
+			formatLog("sql: $this->sql");
+			
+			try {
+				$result = $this->db->prepare($this->sql);
+				// $result->execute($data_array);
+				$result->execute();
+				
+				return $result->fetchAll();
+				
+			} catch(PDOException $e) {
+				formatLog("Error: " . $e->getMessage());
+			}
+		}
+		
+		public function head($limit=5){
+			$result = $this->query(null, null, null, null, "DESC", $limit, 0);
+			$head_result = array();
+			
+			foreach($result as $key => $value){
+				if(in_array($key, $this->sql_columns)){
+					$head_result[$key] = $value;
+				}
+			}
+			
+			return $result;
+		}
+		
+		public function tail($limit=5){
+			// $reversed = array_reverse($input);
 		}
 	}
 ?>

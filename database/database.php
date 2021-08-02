@@ -26,6 +26,7 @@
 		protected $database = null;
 		protected $db = null;
 		protected $table = null;
+		protected $sql_columns = null;
 		
 		protected $sql = "";
 		protected $last_id = 0;
@@ -42,6 +43,38 @@
 			$this->db = NULL;
 		}
 		
+		public static function sqlAnd($querys = array()){
+			return implode(" AND ", $querys);
+		}
+		
+		public static function sqlOr($querys = array()){
+			return implode(" OR ", $querys);
+		}
+		
+		public static function sqlGt($key, $value){
+			return "$key > $value";
+		}
+		
+		public static function sqlGe($key, $value){
+			return "$key >= $value";
+		}
+		
+		public static function sqlEq($key, $value){
+			return "$key = $value";
+		}
+		
+		public static function sqlNe($key, $value){
+			return "$key != $value";
+		}
+		
+		public static function sqlLe($key, $value){
+			return "$key <= $value";
+		}
+		
+		public static function sqlLt($key, $value){
+			return "$key < $value";
+		}
+		
 		// 建立跟資料庫的連接，並設定語系是萬國語言以支援中文
 		protected function connectPDO($server, $user, $password, $database){		
 			try {
@@ -50,10 +83,10 @@
 				// set the PDO error mode to exception
 				$this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 				$this->db->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-				echo "<p>Connected successfully</p>";
+				formatLog("Connected successfully!!");
 			}
 			catch(PDOException $e) {
-				echo "<p>Connection failed: " . $e->getMessage() . "</p>";
+				formatLog("Connection failed: " . $e->getMessage());
 			}
 		}
 		
@@ -89,7 +122,7 @@
 		}
 		
 		public function formatColumns($columns=null){
-			if($columns == null){
+			if(is_null($columns)){
 				return "*";
 			}
 			elseif(count($columns) == 1){
@@ -97,7 +130,7 @@
 				return $columns[0];
 			}
 			else{
-				return join(",", $columns);
+				return implode(",", $columns);
 			}
 		}
 		
@@ -132,13 +165,13 @@
 		}
 		
 		/**
-		 * query 提供較大的彈性來讀取資料庫，但我目前還沒使用到，因此還沒維護
+		 * query 提供較大的彈性來讀取資料庫
 		 */
-		public function query($table=null, $columns=null, $where=null, $sort_by=null, $sort_type="DESC", $n_limit=null, $offset=0){
+		public function query($table=null, $columns=null, $where=null, $sort_by=null, $sort_type="DESC", $limit=null, $offset=0){
 			/*將 table_name 結果按 column_name [ 升序 | 降序 ] 排序
 			SELECT *
 			FROM table_name
-			TODO: WHERE [ conditions1 AND conditions2 ]
+			WHERE [ conditions1 AND conditions2 ]
 			ORDER BY column_name [ASC | DESC];
 
 			:param table_name: 表格名稱
@@ -149,30 +182,30 @@
 			:param limit: 限制從表格中提取的行數
 			:param offset: 從第幾筆數據開始呈現(從 0 開始數)
 			:return:
-			*/
-			if(is_numeric($n_limit)){
-				if($n_limit > 0){
-					$limit = "LIMIT $n_limit";
-				}else{
-					$limit = "";
-				}
+			*/			
+			$format_columns = $this->formatColumns($columns);
+			
+			if(is_null($where)){
+				$where = "";
 			}else{
-				$limit = "";
+				$where = "WHERE $where";
 			}
 			
-			if(empty($condition)){
-				$condition = 1;
+			if(is_null($sort_by)){
+				$sort = "";
+			}else{
+				$sort = "ORDER BY $sort_by $sort_type";
 			}
 			
-			// if(empty($order_by)){
-				// $order_by = 1;
-			// }
+			// LIMIT & OFFSET 似乎必須一起使用
+			if(is_null($limit)){
+				$limit_offset = "";
+			}else{
+				$limit_offset = "LIMIT $limit OFFSET $offset";
+			}
 			
-			// if(empty($fields)){
-				// $fields = "*";
-			// }
-			
-			$this->sql = "SELECT $fields FROM $table WHERE $condition ORDER BY $order_by $limit";
+			$this->sql = "SELECT $format_columns FROM $table $where $sort $limit_offset";
+			formatLog("sql: $this->sql");
 			
 			try {
 				$result = $this->db->prepare($this->sql);
@@ -182,7 +215,7 @@
 				return $result->fetchAll();
 				
 			} catch(PDOException $e) {
-				$this->error_message = "<p class='bg-danger'> $e->getMessage() </p>";
+				formatLog("Error: " . $e->getMessage());
 			}
 		}
 		
