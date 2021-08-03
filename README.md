@@ -2,6 +2,10 @@
 
 將投資相關數據獨立提供與維護
 
+## PHP 筆記
+
+* 根據執行當下的網址路徑，影響了各腳本當中的相對路徑，因此改用 $_SERVER['DOCUMENT_ROOT'] 取得根目錄，再利用絕對路徑去指定檔案
+
 ## REST 操作
 
 url: /api/sources/
@@ -10,6 +14,8 @@ url: /api/sources/
 * POST: 寫入數據
 * PUT: 更新數據
 * DELETE: 刪除數據
+
+* API 返回的 json 數據應以 `<p></p>` 包住，以利和其他 html 標籤區分
 
 ## TABLE: STOCK_LIST
 

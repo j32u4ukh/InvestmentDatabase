@@ -1,6 +1,6 @@
 <?php
-	include_once "database/database.php";
-	include_once "utils.php";
+	include_once ($_SERVER['DOCUMENT_ROOT'] . "/database/database.php");
+	include_once ($_SERVER['DOCUMENT_ROOT'] . "/utils.php");
 	
 	class TradeRecord extends Database{
 		
@@ -106,73 +106,51 @@
 			formatLog("last_id: $this->last_id");
 		}
 		
-		public function query($table=null, $columns=null, $where=null, $sort_by=null, $sort_type="DESC", $limit=null, $offset=0){
-			/*將 table_name 結果按 column_name [ 升序 | 降序 ] 排序
-			SELECT *
-			FROM table_name
-			TODO: WHERE [ conditions1 AND conditions2 ]
-			ORDER BY column_name [ASC | DESC];
+		public function query($params = array()){
+			$columns = defaultMapValue($params, "colums", null);
+			$where = defaultMapValue($params, "where", null);
+			$sort_by = defaultMapValue($params, "sort_by", "NUMBER");
+			$sort_type = defaultMapValue($params, "sort_type", "ASC");
+			$limit = defaultMapValue($params, "limit", null);
+			$offset = defaultMapValue($params, "offset", 0);
 
-			:param table_name: 表格名稱
-			:param columns: 欄位名稱
-			:param where: 篩選條件
-			:param sort_by: 排須依據哪些欄位
-			:param sort_type: 升序(ASC) | 降序(DESC)
-			:param limit: 限制從表格中提取的行數
-			:param offset: 從第幾筆數據開始呈現(從 0 開始數)
-			:return:
-			*/			
-			$format_columns = $this->formatColumns($columns);
+			$results = $this->select(null, $columns, $where, $sort_by, $sort_type, $limit, $offset);			
+			$datas = array();
 			
-			if(is_null($where)){
-				$where = "";
-			}else{
-				$where = "WHERE $where";
-			}
-			
-			if(is_null($sort_by)){
-				$sort = "";
-			}else{
-				$sort = "ORDER BY $sort_by $sort_type";
-			}
-			
-			// LIMIT & OFFSET 似乎必須一起使用
-			if(is_null($limit)){
-				$limit_offset = "";
-			}else{
-				$limit_offset = "LIMIT $limit OFFSET $offset";
-			}
-			
-			$this->sql = "SELECT $format_columns FROM $this->table $where $sort $limit_offset";
-			formatLog("sql: $this->sql");
-			
-			try {
-				$result = $this->db->prepare($this->sql);
-				// $result->execute($data_array);
-				$result->execute();
+			foreach($results as $result){
+				$data = array();
 				
-				return $result->fetchAll();
+				// 將欄位名稱對應的數據加入 $data
+				foreach($result as $key => $value){
+					if(in_array($key, $this->sql_columns, true)){
+						$data[$key] = $value;
+					}
+				}
 				
-			} catch(PDOException $e) {
-				formatLog("Error: " . $e->getMessage());
+				// 將每一筆 $data 加入 $datas
+				$datas[] = $data;
 			}
+			
+			return $datas;
 		}
 		
 		public function head($limit=5){
-			$result = $this->query(null, null, null, null, "DESC", $limit, 0);
-			$head_result = array();
+			formatLog("limit: $limit");
 			
-			foreach($result as $key => $value){
-				if(in_array($key, $this->sql_columns)){
-					$head_result[$key] = $value;
-				}
-			}
+			$datas = $this->query(array("limit" => $limit, "sort_type" => "ASC"));
 			
-			return $result;
+			return $datas;
 		}
 		
 		public function tail($limit=5){
-			// $reversed = array_reverse($input);
+			formatLog("limit: $limit");
+			
+			$datas = $this->query(array("limit" => $limit, "sort_type" => "DESC"));
+			
+			// 讀取資料庫時做了倒序讀取，返回前須再倒序一次
+			$datas = array_reverse($datas);
+			
+			return $datas;
 		}
 	}
 ?>

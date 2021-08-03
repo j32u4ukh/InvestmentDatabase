@@ -11,7 +11,12 @@
 			include_once "utils.php";
 
 			$db = new TradeRecord();
-			$result = $db->head(5);
+			$result = $db->head(3);			
+			echo json_encode($result);
+			
+			echo "<br><br><br><br>";
+			
+			$result = $db->tail(3);			
 			echo json_encode($result);
 		?>
     </body>

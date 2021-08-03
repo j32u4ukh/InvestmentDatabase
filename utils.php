@@ -21,9 +21,17 @@
 		}
 	}
 	
-	function defaultValue($value, $default){
+	function defaultValue($value, $default=null){
 		if(isset($value)){
 			return $value;
+		}else{
+			return $default;
+		}
+	}
+	
+	function defaultMapValue($map, $key, $default=null){
+		if(array_key_exists($key, $map)){
+			return $map[$key];
 		}else{
 			return $default;
 		}

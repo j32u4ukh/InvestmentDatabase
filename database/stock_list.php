@@ -1,6 +1,6 @@
 <?php
-	include_once "database/database.php";
-	include_once "utils.php";
+	include_once ($_SERVER['DOCUMENT_ROOT'] . "/database/database.php");
+	include_once ($_SERVER['DOCUMENT_ROOT'] . "/utils.php");
 	
 	// TODO: sortStockWithPrice, selectByPriceRange, selectByStockIds, updateByStockId, isStockExists
 	class StockList extends Database{

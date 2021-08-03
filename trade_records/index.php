@@ -4,9 +4,9 @@
     </head>
     <body>
 		<?php
-			// include
-            include_once "utils.php";
-        ?>
+			include_once ($_SERVER['DOCUMENT_ROOT'] . "/utils.php");
+			include_once ($_SERVER['DOCUMENT_ROOT'] . "/trade_records/read.php");
+		?>
 <!-- 		<form method="POST" action="trade_record.php">
         <input type="text" name="post_msg" placeholder="請輸入傳送的文字">
         <input type="submit" value="送出">
@@ -16,25 +16,18 @@
 		<?php
 			// GET
             if(isset($_GET["read"])){
-				$read = $_GET["read"]
+				$read = $_GET["read"];
                 formatLog("read:" . $read, false);
 				
-				$limit = defaultValue($_GET["limit"], -1);
+				$limit = defaultMapValue($_GET, "limit", 5);
 				
-				$start_buy = defaultValue($_GET["start_buy"], -1);
-				$end_buy = defaultValue($_GET["end_buy"], -1);
+				$start_buy = defaultMapValue($_GET, "start_buy", null);
+				$end_buy = defaultMapValue($_GET, "end_buy", null);
 				
-				$start_sell = defaultValue($_GET["start_sell"], -1);
-				$end_sell = defaultValue($_GET["limit"], -1);
+				$start_sell = defaultMapValue($_GET, "start_sell", null);
+				$end_sell = defaultMapValue($_GET, "limit", null);
 				
-				switch($read){
-					case "head":
-						break;
-					case "tail":
-						break;
-					case "all":
-						break;
-				}
+				read($read, $limit, $start_buy, $end_buy, $start_sell, $end_sell);
             }
         ?>
 		

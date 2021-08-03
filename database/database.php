@@ -1,9 +1,9 @@
 <?php
-	include_once "utils.php";
+	include_once ($_SERVER['DOCUMENT_ROOT'] . "/utils.php");
 	
 	function connectAccess(){
 		$keys = array("server", "user", "password", "database");
-		$file = fopen("database/access.txt", "r");	
+		$file = fopen($_SERVER['DOCUMENT_ROOT'] . "/database/access.txt", "r");	
 		$access = array();			
 		$i = 0;
 		
@@ -51,26 +51,32 @@
 			return implode(" OR ", $querys);
 		}
 		
+		// key > value
 		public static function sqlGt($key, $value){
 			return "$key > $value";
 		}
 		
+		// key >= value
 		public static function sqlGe($key, $value){
 			return "$key >= $value";
 		}
 		
+		// key = value
 		public static function sqlEq($key, $value){
 			return "$key = $value";
 		}
 		
+		// key != value
 		public static function sqlNe($key, $value){
 			return "$key != $value";
 		}
 		
+		// key <= value
 		public static function sqlLe($key, $value){
 			return "$key <= $value";
 		}
 		
+		// key < value
 		public static function sqlLt($key, $value){
 			return "$key < $value";
 		}
@@ -136,42 +142,13 @@
 		
 		// TODO: 檢查資料表是否存在 https://stackoverflow.com/questions/1717495/check-if-a-database-table-exists-using-php-pdo
 		
-		// 自己實作的讀取資料庫
-		// TODO: 提升查詢彈性，接著可以實作 head 和 tail
-		public function select($table=null, $columns=array(), $n_limit=5){
-			if($table === null){
-				$table = $this->table;
-			}
-			
-			if(count($columns) == 0){
-				$format_columns = "*";
-			}else{
-				// implode = join
-				$format_columns = implode(",", $columns);
-			}
-			
-			$this->sql = "SELECT $format_columns FROM $table LIMIT $n_limit";
-			formatLog($this->sql);
-			
-			try {
-				$result = $this->db->prepare($this->sql);
-				$result->execute();
-				
-				return $result->fetchAll();
-				
-			} catch(PDOException $e) {
-				$this->error_message = "<p class='bg-danger'> $e->getMessage() </p>";
-			}
-		}
-		
-		/**
-		 * query 提供較大的彈性來讀取資料庫
-		 */
-		public function query($table=null, $columns=null, $where=null, $sort_by=null, $sort_type="DESC", $limit=null, $offset=0){
+		// 讀取資料表
+		public function select($table=null, $columns=null, $where=null, $sort_by=null, $sort_type="ASC", 
+							   $limit=null, $offset=0){
 			/*將 table_name 結果按 column_name [ 升序 | 降序 ] 排序
 			SELECT *
 			FROM table_name
-			WHERE [ conditions1 AND conditions2 ]
+			TODO: WHERE [ conditions1 AND conditions2 ]
 			ORDER BY column_name [ASC | DESC];
 
 			:param table_name: 表格名稱
@@ -204,7 +181,7 @@
 				$limit_offset = "LIMIT $limit OFFSET $offset";
 			}
 			
-			$this->sql = "SELECT $format_columns FROM $table $where $sort $limit_offset";
+			$this->sql = "SELECT $format_columns FROM $this->table $where $sort $limit_offset";
 			formatLog("sql: $this->sql");
 			
 			try {
