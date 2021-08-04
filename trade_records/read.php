@@ -3,7 +3,7 @@
 	include_once ($_SERVER['DOCUMENT_ROOT'] . "/database/trade_record.php");
 	include_once ($_SERVER['DOCUMENT_ROOT'] . "/utils.php");
 	
-	function read($read, $limit=null, $start_buy=null, $end_buy=null, $start_sell=null, $end_sell=null){
+	function read($mode, $limit=null, $start_buy=null, $end_buy=null, $start_sell=null, $end_sell=null){
 		$db = new TradeRecord();
 		$limit = defaultValue($limit, 5);
 		
@@ -32,7 +32,7 @@
 			formatLog($sql_where , false);
 		}
 		
-		switch($read){
+		switch($mode){
 			case "head":
 				$datas = $db->head($limit);
 				break;

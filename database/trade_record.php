@@ -67,46 +67,32 @@
 			return $values_prepare;
 		}
 		
-		public function insert($datas, $table=null){
-			// $datas = array(
-				// array(	"STOCK_ID"=>"2012", "BUY_TIME"=>"2021-03-23", "SELL_TIME"=>"2021-04-23", 
-						// "BUY_PRICE"=>"19.95", "SELL_PRICE"=>"25.10", "VOL"=>"1", 
-						// "BUY_COST"=>"19970.00", "SELL_COST"=>"95", "REVENUE"=>"5232.00"),
-				// array(	"STOCK_ID"=>"2012", "BUY_TIME"=>"2021-03-24", "SELL_TIME"=>"2021-04-21", 
-						// "BUY_PRICE"=>"0", "SELL_PRICE"=>"0", "VOL"=>"0", 
-						// "BUY_COST"=>"0", "SELL_COST"=>"0", "REVENUE"=>"590"),
-				
-			// );
+		// public function insert($datas, $table=null){			
+			// $columns = implode(",", $this->sql_columns);
 			
-			$n_data = count($datas);
-			$values_array = array();
-			$data_array = array();
+			// $n_data = count($datas);
+			// $values_array = array();
+			// $data_array = array();
 			
-			for ($i = 0; $i < $n_data; $i++) {
-			  $data = $datas[$i];
+			// for ($i = 0; $i < $n_data; $i++) {
+			  // $data = $datas[$i];
 			  
 			  // 即將添加的欄位名稱
-			  $values_array[] = $this->insertValues($data, $i);
+			  // $values_array[] = $this->insertValues($data, $i);
 			  
 			  // 準備添加的實際數據
-			  $data_array = $this->insertDatas($data_array, $data, $i);
-			}
+			  // $data_array = $this->insertDatas($data_array, $data, $i);
+			// }
 			
-			$values = implode(",", $values_array);
-			formatLog("values: $values");
-			print json_encode($data_array);
+			// $values = implode(",", $values_array);
+			// formatLog("values: $values");
+			// print json_encode($data_array);
 							
-			$this->sql = "INSERT IGNORE INTO `TRADE_RECORD` 
-			(`NUMBER`, `STOCK_ID`, `BUY_TIME`, `SELL_TIME`, `BUY_PRICE`, `SELL_PRICE`, `VOL`, 
-			`BUY_COST`, `SELL_COST`, `REVENUE`)
-			VALUES $values;";
-			formatLog("sql: $this->sql");
+			// $this->sql = "INSERT IGNORE INTO `$this->table` ($columns) VALUES $values;";
+			// formatLog("sql: $this->sql");
 			
-			$result = $this->db->prepare($this->sql);
-			$result->execute($datas);
-			
-			$this->last_id = $this->db->lastInsertId();
-			formatLog("last_id: $this->last_id");
-		}
+			// $result = $this->db->prepare($this->sql);
+			// $result->execute($data_array);
+		// }
 	}
 ?>

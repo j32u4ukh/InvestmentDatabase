@@ -23,6 +23,11 @@
 	// TODO: getDatabaseInfo, getAllTableName, isTableExists, isTableEmpty, getTableInfo, isDataExists
 	// TODO: ResourceData | getLastTime, getDataInfo, getHistoryData, getLastTimeCore, getTimeSection, selectTimeFliter
 	class Database{
+		// 將用於再次連線
+		private $server = null;
+		private $user = null;
+		private $password = null;
+		
 		protected $database = null;
 		protected $db = null;
 		protected $table = null;
@@ -83,7 +88,12 @@
 		}
 		
 		// 建立跟資料庫的連接，並設定語系是萬國語言以支援中文
-		protected function connectPDO($server, $user, $password, $database){		
+		protected function connectPDO($server, $user, $password, $database){
+			// 將用於再次連線
+			$this->server = $server;
+			$this->user = $user;
+			$this->password = $password;
+			
 			try {
 				$this->db = new PDO("mysql:host=$server; charset=utf8mb4; dbname=$database", $user, $password);
 
@@ -123,8 +133,27 @@
 				return $result->fetchAll(); 
 				
 			} catch(PDOException $e) {
-				$this->error_message = "<p class='bg-danger'>$e->getMessage()</p>";
-				echo $this->error_message;
+				// 嘗試重新連線一次
+				$this->connectPDO($this->server, $this->user, $this->password, $this->database);
+				formatLog("嘗試重新連線一次");
+				
+				// 再次執行 sql 指令
+				try {
+					$this->sql = $sql;
+					$result = $this->db->prepare($sql);
+					
+					if(count($data_array) == 0){
+						$result->execute();
+					}else{
+						$result->execute($data_array);
+					}
+					
+					return $result->fetchAll(); 
+					
+				} catch(PDOException $e) {
+					$this->error_message = "<p class='bg-danger'>" . $e->getMessage() . "</p>";
+					echo $this->error_message;
+				}
 			}
 		}
 		
@@ -185,7 +214,7 @@
 		
 		// 呼叫一次，可插入一到多筆數據
 		public function insert($datas, $table=null) {
-			$columns = $this->insertColumns($table, $datas[0]);
+			$columns = implode(",", $this->sql_columns);
 			
 			$n_data = count($datas);
 			$values_array = array();
@@ -202,11 +231,12 @@
 			}
 			
 			$values = implode(",", $values_array);
+			formatLog("values: $values");
+			print json_encode($data_array);
 			
 			// INSERT IGNORE INTO table_name (KEY1, KEY2) VALUES (:KEY1, :KEY2), (:KEY1, :KEY2), (:KEY1, :KEY2);
-			$this->sql = "INSERT IGNORE INTO `$table` ($columns) VALUES $values;";
+			$this->sql = "INSERT IGNORE INTO `$this->table` ($columns) VALUES $values;";
 			formatLog("sql: $this->sql");
-			print json_encode($data_array);
 			
 			$result = $this->db->prepare($this->sql);
 			$result->execute($data_array);
