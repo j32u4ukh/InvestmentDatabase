@@ -1,6 +1,6 @@
 <html>
     <head>
-        <title>交易歷史紀錄</title>
+        <title>交易歷史紀錄 API</title>
     </head>
     <body>
 		<?php
@@ -29,12 +29,10 @@
 				
 				read($read, $limit, $start_buy, $end_buy, $start_sell, $end_sell);
             }
-        ?>
-		
-		<?php            
-            if(isset($_POST["post_msg"])){
-                $post_msg = $_POST["post_msg"];
-                formatLog("post_msg:" . $post_msg, false);
+                   
+            if(isset($_POST["create"])){
+                $create = $_POST["create"];
+                formatLog("create:" . $create, false);
             }
         ?>
     </body>

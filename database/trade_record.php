@@ -31,6 +31,8 @@
 								 PRIMARY KEY (`NUMBER`)";
 			$this->sql_columns = array("NUMBER", "STOCK_ID", "BUY_TIME", "SELL_TIME", "BUY_PRICE", "SELL_PRICE", "VOL", 
 									   "BUY_COST", "SELL_COST", "REVENUE");
+			$this->sort_by = "NUMBER";
+			
 			parent::getTable($this->table, $table_definition);
 		}
 		
@@ -95,7 +97,8 @@
 			print json_encode($data_array);
 							
 			$this->sql = "INSERT IGNORE INTO `TRADE_RECORD` 
-			(`NUMBER`, `STOCK_ID`, `BUY_TIME`, `SELL_TIME`, `BUY_PRICE`, `SELL_PRICE`, `VOL`, `BUY_COST`, `SELL_COST`, `REVENUE`)
+			(`NUMBER`, `STOCK_ID`, `BUY_TIME`, `SELL_TIME`, `BUY_PRICE`, `SELL_PRICE`, `VOL`, 
+			`BUY_COST`, `SELL_COST`, `REVENUE`)
 			VALUES $values;";
 			formatLog("sql: $this->sql");
 			
@@ -104,53 +107,6 @@
 			
 			$this->last_id = $this->db->lastInsertId();
 			formatLog("last_id: $this->last_id");
-		}
-		
-		public function query($params = array()){
-			$columns = defaultMapValue($params, "colums", null);
-			$where = defaultMapValue($params, "where", null);
-			$sort_by = defaultMapValue($params, "sort_by", "NUMBER");
-			$sort_type = defaultMapValue($params, "sort_type", "ASC");
-			$limit = defaultMapValue($params, "limit", null);
-			$offset = defaultMapValue($params, "offset", 0);
-
-			$results = $this->select(null, $columns, $where, $sort_by, $sort_type, $limit, $offset);			
-			$datas = array();
-			
-			foreach($results as $result){
-				$data = array();
-				
-				// 將欄位名稱對應的數據加入 $data
-				foreach($result as $key => $value){
-					if(in_array($key, $this->sql_columns, true)){
-						$data[$key] = $value;
-					}
-				}
-				
-				// 將每一筆 $data 加入 $datas
-				$datas[] = $data;
-			}
-			
-			return $datas;
-		}
-		
-		public function head($limit=5){
-			formatLog("limit: $limit");
-			
-			$datas = $this->query(array("limit" => $limit, "sort_type" => "ASC"));
-			
-			return $datas;
-		}
-		
-		public function tail($limit=5){
-			formatLog("limit: $limit");
-			
-			$datas = $this->query(array("limit" => $limit, "sort_type" => "DESC"));
-			
-			// 讀取資料庫時做了倒序讀取，返回前須再倒序一次
-			$datas = array_reverse($datas);
-			
-			return $datas;
 		}
 	}
 ?>

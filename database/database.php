@@ -27,6 +27,7 @@
 		protected $db = null;
 		protected $table = null;
 		protected $sql_columns = null;
+		protected $sort_by = null;
 		
 		protected $sql = "";
 		protected $last_id = 0;
@@ -142,60 +143,6 @@
 		
 		// TODO: 檢查資料表是否存在 https://stackoverflow.com/questions/1717495/check-if-a-database-table-exists-using-php-pdo
 		
-		// 讀取資料表
-		public function select($table=null, $columns=null, $where=null, $sort_by=null, $sort_type="ASC", 
-							   $limit=null, $offset=0){
-			/*將 table_name 結果按 column_name [ 升序 | 降序 ] 排序
-			SELECT *
-			FROM table_name
-			TODO: WHERE [ conditions1 AND conditions2 ]
-			ORDER BY column_name [ASC | DESC];
-
-			:param table_name: 表格名稱
-			:param columns: 欄位名稱
-			:param where: 篩選條件
-			:param sort_by: 排須依據哪些欄位
-			:param sort_type: 升序(ASC) | 降序(DESC)
-			:param limit: 限制從表格中提取的行數
-			:param offset: 從第幾筆數據開始呈現(從 0 開始數)
-			:return:
-			*/			
-			$format_columns = $this->formatColumns($columns);
-			
-			if(is_null($where)){
-				$where = "";
-			}else{
-				$where = "WHERE $where";
-			}
-			
-			if(is_null($sort_by)){
-				$sort = "";
-			}else{
-				$sort = "ORDER BY $sort_by $sort_type";
-			}
-			
-			// LIMIT & OFFSET 似乎必須一起使用
-			if(is_null($limit)){
-				$limit_offset = "";
-			}else{
-				$limit_offset = "LIMIT $limit OFFSET $offset";
-			}
-			
-			$this->sql = "SELECT $format_columns FROM $this->table $where $sort $limit_offset";
-			formatLog("sql: $this->sql");
-			
-			try {
-				$result = $this->db->prepare($this->sql);
-				// $result->execute($data_array);
-				$result->execute();
-				
-				return $result->fetchAll();
-				
-			} catch(PDOException $e) {
-				formatLog("Error: " . $e->getMessage());
-			}
-		}
-		
 		// 為 INSERT 準備 sql 指令與欄位
 		public function insertColumns($table, $data){
 			$temp = array();
@@ -267,6 +214,106 @@
 			$this->last_id = $this->db->lastInsertId();
 		}
 
+		// 讀取資料表
+		public function select($table=null, $columns=null, $where=null, $sort_by=null, $sort_type="ASC", 
+							   $limit=null, $offset=0){
+			/*將 table_name 結果按 column_name [ 升序 | 降序 ] 排序
+			SELECT *
+			FROM table_name
+			TODO: WHERE [ conditions1 AND conditions2 ]
+			ORDER BY column_name [ASC | DESC];
+
+			:param table_name: 表格名稱
+			:param columns: 欄位名稱
+			:param where: 篩選條件
+			:param sort_by: 排須依據哪些欄位
+			:param sort_type: 升序(ASC) | 降序(DESC)
+			:param limit: 限制從表格中提取的行數
+			:param offset: 從第幾筆數據開始呈現(從 0 開始數)
+			:return:
+			*/			
+			$format_columns = $this->formatColumns($columns);
+			
+			if(is_null($where)){
+				$where = "";
+			}else{
+				$where = "WHERE $where";
+			}
+			
+			if(is_null($sort_by)){
+				$sort = "";
+			}else{
+				$sort = "ORDER BY $sort_by $sort_type";
+			}
+			
+			// LIMIT & OFFSET 似乎必須一起使用
+			if(is_null($limit)){
+				$limit_offset = "";
+			}else{
+				$limit_offset = "LIMIT $limit OFFSET $offset";
+			}
+			
+			$this->sql = "SELECT $format_columns FROM $this->table $where $sort $limit_offset";
+			formatLog("sql: $this->sql");
+			
+			try {
+				$result = $this->db->prepare($this->sql);
+				// $result->execute($data_array);
+				$result->execute();
+				
+				return $result->fetchAll();
+				
+			} catch(PDOException $e) {
+				formatLog("Error: " . $e->getMessage());
+			}
+		}
+		
+		// 高階 select 傳入參數為 array，使得參數使用更為彈性
+		public function query($params = array()){
+			$columns = defaultMapValue($params, "colums", null);
+			$where = defaultMapValue($params, "where", null);
+			$sort_by = defaultMapValue($params, "sort_by", $this->sort_by);
+			$sort_type = defaultMapValue($params, "sort_type", "ASC");
+			$limit = defaultMapValue($params, "limit", null);
+			$offset = defaultMapValue($params, "offset", 0);
+
+			$results = $this->select(null, $columns, $where, $sort_by, $sort_type, $limit, $offset);			
+			$datas = array();
+			
+			foreach($results as $result){
+				$data = array();
+				
+				// 將欄位名稱對應的數據加入 $data
+				foreach($result as $key => $value){
+					if(in_array($key, $this->sql_columns, true)){
+						$data[$key] = $value;
+					}
+				}
+				
+				// 將每一筆 $data 加入 $datas
+				$datas[] = $data;
+			}
+			
+			return $datas;
+		}
+		
+		public function head($limit=5){			
+			$datas = $this->query(array("limit" => $limit, "sort_type" => "ASC"));
+			
+			return $datas;
+		}
+		
+		public function tail($limit=5){
+			formatLog("limit: $limit");
+			
+			$datas = $this->query(array("limit" => $limit, "sort_type" => "DESC"));
+			
+			// 讀取資料庫時做了倒序讀取，返回前須再倒序一次
+			$datas = array_reverse($datas);
+			
+			return $datas;
+		}
+				
 		/**
 		 * 這段可以更新資料庫中的資料
 		 */
