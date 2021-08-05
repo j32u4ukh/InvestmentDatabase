@@ -32,6 +32,7 @@
 			$this->sql_columns = array("NUMBER", "STOCK_ID", "BUY_TIME", "SELL_TIME", "BUY_PRICE", "SELL_PRICE", "VOL", 
 									   "BUY_COST", "SELL_COST", "REVENUE");
 			$this->sort_by = "NUMBER";
+			$this->update_keys = array("STOCK_ID", "BUY_TIME", "SELL_TIME");
 			
 			parent::getTable($this->table, $table_definition);
 		}
@@ -66,33 +67,5 @@
 			
 			return $values_prepare;
 		}
-		
-		// public function insert($datas, $table=null){			
-			// $columns = implode(",", $this->sql_columns);
-			
-			// $n_data = count($datas);
-			// $values_array = array();
-			// $data_array = array();
-			
-			// for ($i = 0; $i < $n_data; $i++) {
-			  // $data = $datas[$i];
-			  
-			  // 即將添加的欄位名稱
-			  // $values_array[] = $this->insertValues($data, $i);
-			  
-			  // 準備添加的實際數據
-			  // $data_array = $this->insertDatas($data_array, $data, $i);
-			// }
-			
-			// $values = implode(",", $values_array);
-			// formatLog("values: $values");
-			// print json_encode($data_array);
-							
-			// $this->sql = "INSERT IGNORE INTO `$this->table` ($columns) VALUES $values;";
-			// formatLog("sql: $this->sql");
-			
-			// $result = $this->db->prepare($this->sql);
-			// $result->execute($data_array);
-		// }
 	}
 ?>

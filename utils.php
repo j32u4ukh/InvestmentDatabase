@@ -1,6 +1,6 @@
 <?php
 	function debugLog($msg){
-		print "<script>console.log('$msg')</script>";
+		print '<script>console.log("'. $msg . '")</script>';
 	}
 	
 	function formatLog($msg, $in_class=true){
@@ -14,10 +14,10 @@
 		    $class = trim($backtrace[1]["class"]);
 		    $method = trim($backtrace[1]["function"]);
 		    
-		    echo "\n<script>console.log('[$class] $method | " . $msg . " ($line)')</script>\n";
+		    echo '<script>console.log("' . "[$class] $method | " . $msg . "|($line)" . '")</script>';
 		}else{
 		    $method = trim($backtrace[0]["function"]);
-		    echo "<script>console.log('[] $method | " . $msg . " ($line)')</script>";
+		    echo '<script>console.log("' . "[] $method | " . $msg . "|($line)" . '")</script>';
 		}
 	}
 	

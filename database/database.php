@@ -32,6 +32,7 @@
 		protected $db = null;
 		protected $table = null;
 		protected $sql_columns = null;
+		protected $update_keys = null;
 		protected $sort_by = null;
 		
 		protected $sql = "";
@@ -172,17 +173,17 @@
 		
 		// TODO: 檢查資料表是否存在 https://stackoverflow.com/questions/1717495/check-if-a-database-table-exists-using-php-pdo
 		
-		// 為 INSERT 準備 sql 指令與欄位
-		public function insertColumns($table, $data){
-			$temp = array();
+		// // 為 INSERT 準備 sql 指令與欄位
+		// public function insertColumns($table, $data){
+			// $temp = array();
 		
-			foreach($data as $key => $value){
-				$temp[] = $key;
-			}
+			// foreach($data as $key => $value){
+				// $temp[] = $key;
+			// }
 			
-			// implode = join			
-			return implode(",", $temp);
-		}
+			// // implode = join			
+			// return implode(",", $temp);
+		// }
 		
 		// 為 INSERT 準備 Value 要插入的空格
 		public function insertValues($data, $index){
@@ -344,33 +345,28 @@
 			return $datas;
 		}
 				
-		/**
-		 * 這段可以更新資料庫中的資料
-		 */
-		public function update($table, $data_array, $key_column, $value) {		
-			if(count($data_array) == 0){
-				return false;
-			}
-			
+		// 更新 UPDATE `TRADE_RECORD` SET `SELL_PRICE` = '32.0' WHERE `TRADE_RECORD`.`NUMBER` = 1;
+		public function update($data_array) {
+			$where_list = array();
 			$setting_list = array();
 			
 			foreach ($data_array as $key => $value) {
-				if($key == $key_column){
-					continue;
+				if(in_array($key, $this->update_keys, true)){
+					$where_list[] = "`$key` = '$value'";
+				}else{
+					$setting_list[] = "`$key` = '$value'";
 				}
-				
-				$setting_list[] = "$key=:$key";
 			}
 			
 			// implode = join
+			$where = Database::sqlAnd($where_list);
 			$setting = implode(",", $setting_list);
-			echo "<p>setting: $setting</p>";
+			// echo "<p>where: $where</p>";
+			// echo "<p>setting: $setting</p>";
 
-			$this->sql = "UPDATE $table SET $setting WHERE $key_column = :$key_column";
-			echo "<p>sql: $this->sql</p>";
-			
-			$result = $this->db->prepare($this->sql);                       
-			$result->execute($data_array);
+			$this->sql = "UPDATE $this->table SET $setting WHERE $where";
+			$result = $this->db->prepare($this->sql);
+			$result->execute();
 		}
 		
 		/**
