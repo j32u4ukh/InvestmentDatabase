@@ -22,9 +22,13 @@ url = "https://webcapitalapiinvestment.000webhostapp.com/trade_records/"
 # response = requests.post(url, data=data)
 
 # POST - update
-data = {"REST": "update", "STOCK_ID": "5519", "BUY_TIME": "2021-04-07", "SELL_TIME": "2021-05-04",
-        "BUY_PRICE": "19.10", "SELL_PRICE": "22.25", "VOL": "1",
-        "BUY_COST": "19120.0", "SELL_COST": "86", "REVENU": "3044.00"}
+# data = {"REST": "update", "STOCK_ID": "5519", "BUY_TIME": "2021-04-07", "SELL_TIME": "2021-05-04",
+#         "BUY_PRICE": "19.10", "SELL_PRICE": "22.25", "VOL": "1",
+#         "BUY_COST": "19120.0", "SELL_COST": "86", "REVENU": "3044.00"}
+# response = requests.post(url, data=data)
+
+# POST - update
+data = {"REST": "delete", "STOCK_ID": "5519", "BUY_TIME": "2021-04-07", "SELL_TIME": "2021-05-04"}
 response = requests.post(url, data=data)
 
 if response.status_code == requests.codes.ok:

@@ -32,7 +32,7 @@
 		protected $db = null;
 		protected $table = null;
 		protected $sql_columns = null;
-		protected $update_keys = null;
+		protected $primary_keys = null;
 		protected $sort_by = null;
 		
 		protected $sql = "";
@@ -351,7 +351,7 @@
 			$setting_list = array();
 			
 			foreach ($data_array as $key => $value) {
-				if(in_array($key, $this->update_keys, true)){
+				if(in_array($key, $this->primary_keys, true)){
 					$where_list[] = "`$key` = '$value'";
 				}else{
 					$setting_list[] = "`$key` = '$value'";
@@ -371,25 +371,27 @@
 		 
 		 TODO: deleteTable
 		 */
-		public function delete($table, $data_array) {
-			$where = array();
+		public function delete($data_array) {
+			$where_list = array();
+			$n_key = count($this->primary_keys);
 			
-			foreach ($data_array as $key => $value) {				
-				$where_list[] = "$key=:$key";
+			foreach ($data_array as $key => $value) {
+				if(in_array($key, $this->primary_keys, true)){
+					$n_key--;
+				}
+				
+				$where_list[] = "`$key` = '$value'";
 			}
 			
-			// implode = join
-			$where = implode(",", $where_list);
-			// echo "<p>$where: $where</p>";
+			if($n_key > 0){
+				echo "主鍵數量不足: $n_key 個";
+				return;
+			}
 			
-			$result = json_encode($where);
-			// echo "<p>where: $result</p>";
-			
-			$this->sql = "DELETE FROM $table WHERE $where";
-			// echo "<p>sql: $this->sql</p>";
-			
+			$where = Database::sqlAnd($where_list);
+			$this->sql = "DELETE FROM $this->table WHERE $where";
 			$result = $this->db->prepare($this->sql);
-			$result->execute($data_array);
+			$result->execute();
 		}
 
 		/**

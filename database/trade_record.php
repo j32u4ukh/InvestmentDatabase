@@ -32,7 +32,7 @@
 			$this->sql_columns = array("NUMBER", "STOCK_ID", "BUY_TIME", "SELL_TIME", "BUY_PRICE", "SELL_PRICE", "VOL", 
 									   "BUY_COST", "SELL_COST", "REVENUE");
 			$this->sort_by = "NUMBER";
-			$this->update_keys = array("STOCK_ID", "BUY_TIME", "SELL_TIME");
+			$this->primary_keys = array("STOCK_ID", "BUY_TIME", "SELL_TIME");
 			
 			parent::getTable($this->table, $table_definition);
 		}

@@ -8,6 +8,7 @@
 			include_once ($_SERVER['DOCUMENT_ROOT'] . "/trade_records/read.php");
 			include_once ($_SERVER['DOCUMENT_ROOT'] . "/trade_records/add.php");
 			include_once ($_SERVER['DOCUMENT_ROOT'] . "/trade_records/update.php");
+			include_once ($_SERVER['DOCUMENT_ROOT'] . "/trade_records/delete.php");
 			
 			// GET
             if(isset($_GET["mode"])){
@@ -77,6 +78,7 @@
 						update($_POST);
 						break;
 					case "delete":
+						delete($_POST);
 						break;
 				}
 			}
