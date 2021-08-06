@@ -7,6 +7,7 @@
 		$params = array();
 		
 		// primary _keys = array("STOCK_ID", "BUY_TIME", "SELL_TIME");
+		$number = $post["NUMBER"];
 		$stock_id = $post["STOCK_ID"];
 		$buy_time = $post["BUY_TIME"];
 		$sell_time = $post["SELL_TIME"];
@@ -14,6 +15,7 @@
 		$params["STOCK_ID"] = $stock_id;
 		$params["BUY_TIME"] = $buy_time;
 		$params["SELL_TIME"] = $sell_time;
+		$params["NUMBER"] = $number;
 		
 		// array("BUY_PRICE", "SELL_PRICE", "VOL", "BUY_COST", "SELL_COST", "REVENUE");		
 		$params = updateParams($post, "BUY_PRICE", $params);
@@ -30,6 +32,7 @@
 		$where[] = Database::sqlEq("STOCK_ID", "'" . $stock_id . "'");
 		$where[] = Database::sqlEq("BUY_TIME", "'" . $buy_time . "'");
 		$where[] = Database::sqlEq("SELL_TIME", "'" . $sell_time . "'");		
+		$where[] = Database::sqlEq("NUMBER", "'" . $number . "'");		
 		$sql_where = Database::sqlAnd($where);
 		
 		$datas = $db->query(array("where" => $sql_where));
@@ -39,7 +42,7 @@
 	// 如果 map 裡面有 key，就將數值加入 params
 	function updateParams($map, $key, $params){
 		if(array_key_exists($key, $map)){
-			$params[$key] = $map[$key];
+			$params[$key] = "'" . $map[$key] . "'";
 		}
 		
 		return $params;

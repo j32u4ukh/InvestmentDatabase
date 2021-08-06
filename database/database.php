@@ -366,32 +366,8 @@
 			$result->execute();
 		}
 		
-		public function updates($datas){
-			/* 多筆更新
-			UPDATE pre_students
-			SET 
-			
-			NAME = CASE
-			WHEN id = 1 THEN
-				'张三'
-			WHEN id = 2 THEN
-				'李四'
-			ELSE
-				NAME
-			END
-			,
-			email = CASE
-			WHEN id = 1 THEN
-				'zhansan@qq.com'
-			WHEN id = 2 THEN
-				'lisi@qq.com'
-			ELSE
-				email
-			END
-			
-			WHERE
-				id IN (1, 2)
-			*/
+		// 多筆更新
+		public function updates($datas){			
 			$update_datas = array();
 			$where_list = array();
 			
@@ -415,7 +391,7 @@
 			}
 			
 			$set = implode(",", $set_list);			
-			$this->sql = "UPDATE $this->table SET $set WHERE $where";
+			$this->sql = "UPDATE $this->table SET $set WHERE $where;";
 			$result = $this->db->prepare($this->sql);
 			$result->execute();
 			
@@ -430,7 +406,7 @@
 				if(in_array($key, $this->primary_keys, true)){
 					$where_list[] = "`$key` = '$value'";
 				}else{
-					$setting_list[$key] = $value;
+					$setting_list[$key] = "'$value'";
 				}
 			}
 			

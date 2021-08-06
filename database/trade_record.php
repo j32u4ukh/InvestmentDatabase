@@ -18,54 +18,41 @@
 		}
 		
 		public function getTable($table=null, $table_definition=null){	
-			$table_definition = "`NUMBER` INT NOT NULL AUTO_INCREMENT ,
-								 `STOCK_ID` VARCHAR(10) NOT NULL ,
+			$table_definition = "`NUMBER` VARCHAR(10) NOT NULL , 
+								 `STOCK_ID` VARCHAR(10) NOT NULL , 
 								 `BUY_TIME` VARCHAR(10) NOT NULL , 
-								 `SELL_TIME` VARCHAR(10) NOT NULL ,
-								 `BUY_PRICE` VARCHAR(10) NOT NULL ,
+								 `SELL_TIME` VARCHAR(10) NOT NULL , 
+								 `BUY_PRICE` VARCHAR(10) NOT NULL , 
 								 `SELL_PRICE` VARCHAR(10) NOT NULL , 
-								 `VOL` VARCHAR(10) NOT NULL ,
-								 `BUY_COST` VARCHAR(10) NOT NULL ,
+								 `VOL` VARCHAR(10) NOT NULL , 
+								 `BUY_COST` VARCHAR(10) NOT NULL , 
 								 `SELL_COST` VARCHAR(10) NOT NULL , 
 								 `REVENUE` VARCHAR(10) NOT NULL , 
 								 PRIMARY KEY (`NUMBER`)";
 			$this->sql_columns = array("NUMBER", "STOCK_ID", "BUY_TIME", "SELL_TIME", "BUY_PRICE", "SELL_PRICE", "VOL", 
 									   "BUY_COST", "SELL_COST", "REVENUE");
 			$this->sort_by = "NUMBER";
-			$this->primary_keys = array("STOCK_ID", "BUY_TIME", "SELL_TIME");
+			$this->primary_keys = array("NUMBER");
 			
 			parent::getTable($this->table, $table_definition);
 		}
 		
-		/*INSERT INTO `TRADE_RECORD` 
-		(`NUMBER`, `STOCK_ID`, `BUY_TIME`, `SELL_TIME`, `BUY_PRICE`, `SELL_PRICE`, `VOL`, `BUY_COST`, `SELL_COST`, `REVENUE`) 
-		VALUES (NULL, '1712','2021-03-29','2021-04-14','22.6','21.75','1','22620','85','-955');*/
-		
-		public function valueFromRawData($raw_data){
-			// raw_data: 3048,2021-02-26,2021-03-16,24.05,32,1,24070,116,7814
-			
-		}
-		
-		public function valueFromArray($data_array){
-			
-		}
-		
 		// [TradeRecord] 為 INSERT 準備 Value 要插入的空格
-		public function insertValues($data, $index){
+		// public function insertValues($data, $index){
 			// TradeRecord 的第一個欄位為 auto increment，無須自己給值就會自動遞增，指令上要傳入 NULL
-			$temp = array("NULL");
+			// $temp = array("NULL");
 		
-			foreach($data as $key => $value){
-				$temp[] = ":$key" . "_" . $index;
-			}
+			// foreach($data as $key => $value){
+				// $temp[] = ":$key" . "_" . $index;
+			// }
 			
 			// implode = join
-			$values = implode(",", $temp);
+			// $values = implode(",", $temp);
 			
 			// (NULL, :STOCK_ID_i,:BUY_TIME_i,:SELL_TIME_i,:BUY_PRICE_i,:SELL_PRICE_i,:VOL_i,:BUY_COST_i,:SELL_COST_i,:REVENUE_i)
-			$values_prepare = "($values)";
+			// $values_prepare = "($values)";
 			
-			return $values_prepare;
-		}
+			// return $values_prepare;
+		// }
 	}
 ?>

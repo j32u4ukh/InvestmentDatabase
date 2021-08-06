@@ -3,31 +3,32 @@
 	include_once ($_SERVER['DOCUMENT_ROOT'] . "/database/trade_record.php");
 	include_once ($_SERVER['DOCUMENT_ROOT'] . "/utils.php");
 	
-	function read($mode, $limit=null, $start_buy=null, $end_buy=null, $start_sell=null, $end_sell=null){
+	function read($get){
 		$db = new TradeRecord();
-		$limit = defaultValue($limit, 5);
+		$mode = $get["mode"];		
+		$limit = defaultMapValue($get, "limit", null);
 		
 		$where = array();
 		
-		if(isset($start_buy)){
-			$where[] = Database::sqlGe("BUY_TIME", $start_buy);
+		if(array_key_exists("start_buy", $get)){
+			$where[] = Database::sqlGe("BUY_TIME", $get["start_buy"]);
 		}
 		
-		if(isset($end_buy)){
-			$where[] = Database::sqlLe("BUY_TIME", $end_buy);
+		if(array_key_exists("end_buy", $get)){
+			$where[] = Database::sqlLe("BUY_TIME", $get["end_buy"]);
 		}
 		
-		if(isset($start_sell)){
-			$where[] = Database::sqlGe("SELL_TIME", $start_sell);
+		if(array_key_exists("start_sell", $get)){
+			$where[] = Database::sqlGe("SELL_TIME", $get["start_sell"]);
 		}
 		
-		if(isset($end_sell)){
-			$where[] = Database::sqlLe("SELL_TIME", $end_sell);
+		if(array_key_exists("end_sell", $get)){
+			$where[] = Database::sqlLe("SELL_TIME", $get["end_sell"]);
 		}
 		
 		$sql_where = null;
 		
-		if(count($where) == 0){
+		if(count($where) > 0){
 			$sql_where = Database::sqlAnd($where);
 			formatLog($sql_where , false);
 		}
@@ -40,10 +41,10 @@
 				$datas = $db->tail($limit);
 				break;
 			case "all":
-				$datas = $this->query(array("limit" => $limit, "where" => $sql_where));
+				$datas = $db->query(array("limit" => $limit, "where" => $sql_where));
 				break;
 		}
 		
-		echo "<p>" . json_encode($datas) . "</p>";
+		echo "<p class='api'>" . json_encode($datas) . "</p>";
 	}
 ?>

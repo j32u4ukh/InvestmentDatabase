@@ -6,6 +6,7 @@
 	function add($post){
 		$db = new TradeRecord();
 		
+		$number = $post["number"];
 		$stock_id = $post["stock_id"];
 		$buy_time = $post["buy_time"];
 		$sell_time = $post["sell_time"];
@@ -18,9 +19,9 @@
 		$revenue = $post["revenue"];
 							
 		$datas = array(
-			array("stock_id"=>"$stock_id", "buy_time"=>"$buy_time", "sell_time"=>"$sell_time",
-				  "buy_price"=>"$buy_price", "sell_price"=>"$sell_price", "vol"=>"$vol",
-				  "buy_cost"=>"$buy_cost", "sell_cost"=>"$sell_cost", "revenue"=>"$revenue")
+			array("NUMBER"=>"$number", "STOCK_ID"=>"$stock_id", "BUY_TIME"=>"$buy_time", "SELL_TIME"=>"$sell_time", 
+				  "BUY_PRICE"=>"$buy_price", "SELL_PRICE"=>"$sell_price", "VOL"=>"$vol",
+				  "BUY_COST"=>"$buy_cost", "SELL_COST"=>"$sell_cost", "REVENUE"=>"$revenue")
 		);
 		
 		$db->insert($datas);
