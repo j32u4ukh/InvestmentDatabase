@@ -31,51 +31,25 @@
 				
 				switch($rest){
 					case "add":
-						$mode = $_POST["mode"];
+						$mode = $_POST["MODE"];
 						
 						if($mode == "one"){
-							$stock_id = $_POST["stock_id"];
-							formatLog("stock_id:" . $stock_id, false);
-							
-							$buy_time = $_POST["buy_time"];
-							$sell_time = $_POST["sell_time"];
-							
-							$buy_price = $_POST["buy_price"];
-							$sell_price = $_POST["sell_price"];
-							
-							$vol = $_POST["vol"];
-							
-							$buy_cost = $_POST["buy_cost"];
-							$sell_cost = $_POST["sell_cost"];
-							$revenue = $_POST["revenue"];
-							
-							add($stock_id, $buy_time, $sell_time, $buy_price, $sell_price, $vol, 
-								$buy_cost, $sell_cost, $revenue);
+							add($_POST);
 							
 						}else{
-							formatLog("一次添加多筆模式，待實作", false);
-							$stock_id = $_POST["stock_id"];
-							$buy_time = $_POST["buy_time"];
-							$sell_time = $_POST["sell_time"];
-							$buy_price = $_POST["buy_price"];
-							$sell_price = $_POST["sell_price"];
-							$vol = $_POST["vol"];
-							$buy_cost = $_POST["buy_cost"];
-							$sell_cost = $_POST["sell_cost"];
-							$revenue = $_POST["revenue"];
-							
-							$datas = array(
-								array("stock_id"=>"$stock_id", "buy_time"=>"$buy_time", "sell_time"=>"$sell_time",
-									  "buy_price"=>"$buy_price", "sell_price"=>"$sell_price", "vol"=>"$vol",
-									  "buy_cost"=>"$buy_cost", "sell_cost"=>"$sell_cost", "revenue"=>"$revenue")
-							);
-										
-							echo "<p>" . json_encode($datas) . "</p>";
+							addMultiDatas($_POST);
 						}
 
 						break;
 					case "update":
-						update($_POST);
+						$mode = $_POST["MODE"];
+						
+						if($mode == "one"){
+							update($_POST);
+							
+						}else{
+							updateMultiDatas($_POST);
+						}
 						break;
 					case "delete":
 						delete($_POST);

@@ -44,4 +44,14 @@
 		
 		return $params;
 	}
+	
+	function updateMultiDatas($post){
+		$datas = json_decode($post["datas"], true);
+		
+		$db = new TradeRecord();
+		$where = $db->updates($datas);
+		
+		$datas = $db->query(array("where" => $where));
+		echo "<p class='api'>" . json_encode($datas) . "</p>";
+	}
 ?>

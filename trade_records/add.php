@@ -3,8 +3,20 @@
 	include_once ($_SERVER['DOCUMENT_ROOT'] . "/database/trade_record.php");
 	include_once ($_SERVER['DOCUMENT_ROOT'] . "/utils.php");
 	
-	function add($stock_id, $buy_time, $sell_time, $buy_price, $sell_price, $vol, $buy_cost, $sell_cost, $revenue){
+	function add($post){
 		$db = new TradeRecord();
+		
+		$stock_id = $post["stock_id"];
+		$buy_time = $post["buy_time"];
+		$sell_time = $post["sell_time"];
+		
+		$buy_price = $post["buy_price"];
+		$sell_price = $post["sell_price"];		
+		$vol = $post["vol"];		
+		$buy_cost = $post["buy_cost"];
+		$sell_cost = $post["sell_cost"];
+		$revenue = $post["revenue"];
+							
 		$datas = array(
 			array("stock_id"=>"$stock_id", "buy_time"=>"$buy_time", "sell_time"=>"$sell_time",
 				  "buy_price"=>"$buy_price", "sell_price"=>"$sell_price", "vol"=>"$vol",
@@ -17,6 +29,20 @@
 						"data"=>$data);
 						
 		echo "<p>" . json_encode($result) . "</p>";
+	}
+	
+	function addMultiDatas($post){
+		$db = new TradeRecord();
+		
+		$datas = json_decode($post["datas"], true);
+		$n_data	= count($datas);	
+		$db->insert($datas);
+		
+		$datas = $db->tail($n_data);
+		$result = array("status"=>"success", 
+						"datas"=>$datas);
+						
+		echo "<p class='api'>" . json_encode($result) . "</p>";
 	}
 	
 	function testOnAdd(){

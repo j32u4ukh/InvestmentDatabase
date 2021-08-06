@@ -346,7 +346,7 @@
 		}
 				
 		// 更新 UPDATE `TRADE_RECORD` SET `SELL_PRICE` = '32.0' WHERE `TRADE_RECORD`.`NUMBER` = 1;
-		public function update($data_array) {
+		public function update($data_array) {			
 			$where_list = array();
 			$setting_list = array();
 			
@@ -364,6 +364,101 @@
 			$this->sql = "UPDATE $this->table SET $setting WHERE $where";
 			$result = $this->db->prepare($this->sql);
 			$result->execute();
+		}
+		
+		public function updates($datas){
+			/* 多筆更新
+			UPDATE pre_students
+			SET 
+			
+			NAME = CASE
+			WHEN id = 1 THEN
+				'张三'
+			WHEN id = 2 THEN
+				'李四'
+			ELSE
+				NAME
+			END
+			,
+			email = CASE
+			WHEN id = 1 THEN
+				'zhansan@qq.com'
+			WHEN id = 2 THEN
+				'lisi@qq.com'
+			ELSE
+				email
+			END
+			
+			WHERE
+				id IN (1, 2)
+			*/
+			$update_datas = array();
+			$where_list = array();
+			
+			foreach($datas as $data){
+				$where_list[] = $this->updateMap($update_datas, $data);
+			}
+			
+			$where = Database::sqlor($where_list);
+			
+			$set_list = array();
+			$columns = array();
+			
+			foreach($update_datas as $key => $value){
+			    
+			    foreach($value as $column => $val){
+    				$columns[] = $column;
+    				$set_list[] = $this->updateSet($update_datas, $column);
+    			}
+    			
+			    break;
+			}
+			
+			$set = implode(",", $set_list);			
+			$this->sql = "UPDATE $this->table SET $set WHERE $where";
+			$result = $this->db->prepare($this->sql);
+			$result->execute();
+			
+			return $where;
+		}
+		
+		public function updateMap(&$datas, $data){
+			$where_list = array();
+			$setting_list = array();
+			
+			foreach ($data as $key => $value) {
+				if(in_array($key, $this->primary_keys, true)){
+					$where_list[] = "`$key` = '$value'";
+				}else{
+					$setting_list[$key] = $value;
+				}
+			}
+			
+			$where = "(" . Database::sqlAnd($where_list) . ")";
+			$datas[$where] = $setting_list;
+			
+			return $where;
+		}
+		
+		public function updateSet($datas, $column){
+			/*
+			NAME = CASE
+			WHEN id = 1 THEN
+				'张三'
+			WHEN id = 2 THEN
+				'李四'
+			ELSE
+				NAME
+			END*/
+			$sql_set = "$column = CASE ";
+
+			foreach($datas as $where => $setting_list){
+				$sql_set .= "WHEN $where THEN $setting_list[$column] ";
+			}
+			
+			$sql_set .= "ELSE $column END";
+			
+			return $sql_set;
 		}
 		
 		/**
