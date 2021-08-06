@@ -18,4 +18,21 @@
 						
 		echo "<p>" . json_encode($result) . "</p>";
 	}
+	
+	function testOnAdd(){
+		echo "<form action='./index.php' method='post'>";
+		echo "	mode:<input type='text' id='mode' name='mode'><br>";
+		echo "  stock_id:<input type='text' id='stock_id' name='stock_id'><br>";
+		echo "  buy_time:<input type='text' id='buy_time' name='buy_time'><br>";
+		echo "  sell_time:<input type='text' id='sell_time' name='sell_time'><br>";
+
+		echo "	buy_price:<input type='text' id='buy_price' name='buy_price'><br>";
+		echo "	sell_price:<input type='text' id='sell_price' name='sell_price'><br>";
+		echo "	vol:<input type='text' id='vol' name='vol'><br>";
+		echo "	buy_cost:<input type='text' id='buy_cost' name='buy_cost'><br>";
+		echo "	sell_cost:<input type='text' id='sell_cost' name='sell_cost'><br>";
+		echo "	revenue:<input type='text' id='revenue' name='revenue'><br>";
+		echo "	<input type='submit' value='Submit'>";
+		echo "<</form>-->";
+	}
 ?>

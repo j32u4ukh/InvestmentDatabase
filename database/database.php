@@ -153,7 +153,7 @@
 					
 				} catch(PDOException $e) {
 					$this->error_message = "<p class='bg-danger'>" . $e->getMessage() . "</p>";
-					echo $this->error_message;
+					// echo $this->error_message;
 				}
 			}
 		}
@@ -284,7 +284,7 @@
 				$limit_offset = "LIMIT $limit OFFSET $offset";
 			}
 			
-			$this->sql = "SELECT $format_columns FROM $this->table $where $sort $limit_offset";
+			$this->sql = "SELECT $format_columns FROM $this->table $where $sort $limit_offset;";
 			formatLog("sql: $this->sql");
 			
 			try {
@@ -361,9 +361,6 @@
 			// implode = join
 			$where = Database::sqlAnd($where_list);
 			$setting = implode(",", $setting_list);
-			// echo "<p>where: $where</p>";
-			// echo "<p>setting: $setting</p>";
-
 			$this->sql = "UPDATE $this->table SET $setting WHERE $where";
 			$result = $this->db->prepare($this->sql);
 			$result->execute();
@@ -383,13 +380,13 @@
 			
 			// implode = join
 			$where = implode(",", $where_list);
-			echo "<p>$where: $where</p>";
+			// echo "<p>$where: $where</p>";
 			
 			$result = json_encode($where);
-			echo "<p>where: $result</p>";
+			// echo "<p>where: $result</p>";
 			
 			$this->sql = "DELETE FROM $table WHERE $where";
-			echo "<p>sql: $this->sql</p>";
+			// echo "<p>sql: $this->sql</p>";
 			
 			$result = $this->db->prepare($this->sql);
 			$result->execute($data_array);
