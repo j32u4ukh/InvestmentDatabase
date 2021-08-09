@@ -96,7 +96,7 @@
 			$this->password = $password;
 			
 			try {
-				$this->db = new PDO("mysql:host=$server; charset=utf8mb4; dbname=$database", $user, $password);
+				$this->db = new PDO("mysql:host=$server; charset=utf8; dbname=$database", $user, $password);
 
 				// set the PDO error mode to exception
 				$this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);

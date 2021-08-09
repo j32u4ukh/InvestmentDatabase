@@ -1,11 +1,12 @@
 import json
 from pprint import pprint
-
+from abc import ABCMeta, abstractmethod
 import requests
 from bs4 import BeautifulSoup
+from enum import Enum
 
 
-class InvestmentApi:
+class InvestmentApi(metaclass=ABCMeta):
     def __init__(self, endpoint):
         self.endpoint = endpoint
         self.add_buffer = []
@@ -41,48 +42,21 @@ class InvestmentApi:
         if value is not None:
             datas[key] = value
 
-    def add(self, datas) -> list:
-        data = {"rest": "add", "mode": "multi", "datas": json.dumps(datas)}
-        response = requests.post(self.endpoint, data=data)
-        return self.execute(response)
+    @staticmethod
+    @abstractmethod
+    def splitRawData(raw_data: str) -> dict:
+        pass
 
-    def read(self, datas) -> list:
-        response = requests.get(self.endpoint, params=datas)
-        return self.execute(response)
-
-    def update(self, datas) -> list:
-        data = {"rest": "update", "mode": "multi", "datas": json.dumps(datas)}
-        response = requests.post(self.endpoint, data=data)
-        return self.execute(response)
-
-    def delete(self, data) -> list:
-        response = requests.post(self.endpoint, data=data)
-        return self.execute(response)
-
-
-class TradeRecordApi(InvestmentApi):
-    def __init__(self):
-        super().__init__(endpoint="https://webcapitalapiinvestment.000webhostapp.com/trade_records/")
-
-    def add(self, datas=None):
-        results = super().add(self.add_buffer)
+    def add(self):
+        results = self.addData(self.add_buffer)
         self.add_buffer = []
 
         return results
 
-    def addBuffer(self, number, stock_id, buy_time, sell_time, buy_price, sell_price, vol,
-                  buy_cost, sell_cost, revenue) -> None:
-        data = {"NUMBER": number,
-                "STOCK_ID": stock_id,
-                "BUY_TIME": buy_time,
-                "SELL_TIME": sell_time,
-                "BUY_PRICE": buy_price,
-                "SELL_PRICE": sell_price,
-                "VOL": vol,
-                "BUY_COST": buy_cost,
-                "SELL_COST": sell_cost,
-                "REVENUE": revenue}
-        self.add_buffer.append(data)
+    def addData(self, datas) -> list:
+        data = {"rest": "add", "mode": "multi", "datas": json.dumps(datas)}
+        response = requests.post(self.endpoint, data=data)
+        return self.execute(response)
 
     def addDataBuffer(self, data) -> None:
         self.add_buffer.append(data)
@@ -90,6 +64,42 @@ class TradeRecordApi(InvestmentApi):
     def addRawDataBuffer(self, raw_data: str) -> None:
         data = self.splitRawData(raw_data)
         self.add_buffer.append(data)
+
+    def read(self, datas) -> list:
+        response = requests.get(self.endpoint, params=datas)
+        return self.execute(response)
+
+    def update(self):
+        results = self.updateData(self.update_buffer)
+        self.update_buffer = []
+
+        return results
+
+    def updateData(self, datas) -> list:
+        data = {"rest": "update", "mode": "multi", "datas": json.dumps(datas)}
+        response = requests.post(self.endpoint, data=data)
+        return self.execute(response)
+
+    def updateDataBuffer(self, data) -> None:
+        self.update_buffer.append(data)
+
+    # 所有欄目都必須有
+    def updateRawDataBuffer(self, raw_data: str) -> None:
+        data = self.splitRawData(raw_data)
+        self.update_buffer.append(data)
+
+    def deleteData(self, data) -> list:
+        response = requests.post(self.endpoint, data=data)
+        return self.execute(response)
+
+    @abstractmethod
+    def deleteDatas(self, datas):
+        pass
+
+
+class TradeRecordApi(InvestmentApi):
+    def __init__(self):
+        super().__init__(endpoint="https://webcapitalapiinvestment.000webhostapp.com/trade_records/")
 
     @staticmethod
     def splitRawData(raw_data: str) -> dict:
@@ -107,6 +117,20 @@ class TradeRecordApi(InvestmentApi):
 
         return data
 
+    def addBuffer(self, number, stock_id, buy_time, sell_time, buy_price, sell_price, vol,
+                  buy_cost, sell_cost, revenue) -> None:
+        data = {"NUMBER": number,
+                "STOCK_ID": stock_id,
+                "BUY_TIME": buy_time,
+                "SELL_TIME": sell_time,
+                "BUY_PRICE": buy_price,
+                "SELL_PRICE": sell_price,
+                "VOL": vol,
+                "BUY_COST": buy_cost,
+                "SELL_COST": sell_cost,
+                "REVENUE": revenue}
+        self.add_buffer.append(data)
+
     def read(self, mode="all", limit=None, start_buy=None, end_buy=None, start_sell=None, end_sell=None):
         datas = {"mode": mode}
         self.formDatas(datas, "limit", limit)
@@ -118,12 +142,6 @@ class TradeRecordApi(InvestmentApi):
         print(datas)
 
         return super().read(datas)
-
-    def update(self, datas=None):
-        results = super().update(self.update_buffer)
-        self.update_buffer = []
-
-        return results
 
     # 允許部分項目為空
     def updateBuffer(self, number, stock_id=None, buy_time=None, sell_time=None, buy_price=None, sell_price=None,
@@ -142,15 +160,66 @@ class TradeRecordApi(InvestmentApi):
 
         self.update_buffer.append(data)
 
-    def updateDataBuffer(self, data) -> None:
-        self.update_buffer.append(data)
-
-    # 所有欄目都必須有
-    def updateRawDataBuffer(self, raw_data: str) -> None:
-        data = self.splitRawData(raw_data)
-        print(f"[TradeRecordApi] updateRawDataBuffer | data: {data}")
-        self.update_buffer.append(data)
-
-    def delete(self, datas):
+    def deleteDatas(self, datas):
         for data in datas:
-            super().delete({"rest": "delete", "NUMBER": str(data)})
+            super().deleteData({"rest": "delete", "NUMBER": str(data)})
+
+
+class CapitalApi(InvestmentApi):
+    class EType(Enum):
+        NoneTpye = None
+        Capital = "capital"
+        Revenu = "revenu"
+
+    def __init__(self):
+        super().__init__(endpoint="https://webcapitalapiinvestment.000webhostapp.com/capitals/")
+
+    @staticmethod
+    def splitRawData(raw_data: str) -> dict:
+        split_data = raw_data.split(",")
+        data = {"TIME": str(split_data[0]),
+                "USER": str(split_data[1]),
+                "TYPE": str(split_data[2]),
+                "FLOW": str(split_data[3]),
+                "STOCK": str(split_data[4]),
+                "REMARK": str(split_data[5])}
+
+        return data
+
+    def addBuffer(self, time: str, user: str, capital_type: EType, flow: str, stock: str, remark: str) -> None:
+        data = {"TIME": time,
+                "USER": user,
+                "TYPE": capital_type.value,
+                "FLOW": flow,
+                "STOCK": stock,
+                "REMARK": remark}
+        self.add_buffer.append(data)
+
+    def read(self, mode="all", start_time=None, end_time=None, user=None, capital_type: EType = EType.NoneTpye):
+        datas = {"mode": mode}
+        self.formDatas(datas, "start_time", start_time)
+        self.formDatas(datas, "end_time", end_time)
+        self.formDatas(datas, "user", user)
+        self.formDatas(datas, "type", capital_type.value)
+
+        print(datas)
+
+        return super().read(datas)
+
+    # 允許部分項目為空
+    def updateBuffer(self, time: str = None, user: str = None, capital_type: EType = EType.NoneTpye,
+                     flow: str = None, stock: str = None, remark: str = None) -> None:
+        data = {}
+
+        self.formDatas(data, "STOCK_ID", time)
+        self.formDatas(data, "BUY_TIME", user)
+        self.formDatas(data, "SELL_TIME", capital_type.value)
+        self.formDatas(data, "BUY_PRICE", flow)
+        self.formDatas(data, "SELL_PRICE", stock)
+        self.formDatas(data, "VOL", remark)
+
+        self.update_buffer.append(data)
+
+    def deleteDatas(self, datas):
+        for data in datas:
+            super().deleteData({"rest": "delete", "NUMBER": str(data)})

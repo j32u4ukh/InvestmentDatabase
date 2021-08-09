@@ -29,7 +29,7 @@
 		$result = array("status"=>"success", 
 						"data"=>$data);
 						
-		echo "<p>" . json_encode($result) . "</p>";
+		echo "<p class='api'>" . json_encode($result) . "</p>";
 	}
 	
 	function addMultiDatas($post){

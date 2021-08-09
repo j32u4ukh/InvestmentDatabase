@@ -8,10 +8,10 @@ from pprint import pprint
 from random import randint
 import time
 
-url = "https://webcapitalapiinvestment.000webhostapp.com/trade_records/"
+url = "https://webcapitalapiinvestment.000webhostapp.com/capitals/"
 
 # GET
-# params = {"mode": "tail", "limit": "3"}
+# params = {"mode": "all", "type": "capital"}
 # response = requests.get(url, params=params)
 # print("response.url:", response.url)
 
@@ -39,30 +39,16 @@ url = "https://webcapitalapiinvestment.000webhostapp.com/trade_records/"
 # response = requests.post(url, data=data)
 
 # POST - update(mode: multi)
-datas = [{'NUMBER': '5',
-          'STOCK_ID': '2012',
-          'BUY_TIME': '2021-03-23',
-          'SELL_TIME': '2021-04-23',
-          'BUY_PRICE': '0',
-          'SELL_PRICE': '0',
-          'VOL': '0',
-          'BUY_COST': '0',
-          'SELL_COST': '0',
-          'REVENUE': '590.0'},
-         {'NUMBER': '6',
-          'STOCK_ID': '2419',
-          'BUY_TIME': '2021-04-28',
-          'SELL_TIME': '2021-05-03',
-          'BUY_PRICE': '25.55',
-          'SELL_PRICE': '23.55',
-          'VOL': '1',
-          'BUY_COST': '25570.00',
-          'SELL_COST': '90',
-          'REVENUE': '-2110.0'}
-         ]
-data = {"rest": "update", "mode": "multi",
-        "datas": json.dumps(datas)}
-response = requests.post(url, data=data)
+# datas = [{'NUMBER': '3',
+#           'FLOW': '421595.0',
+#           'STOCK': '421595.0'},
+#          {'NUMBER': '4',
+#           'FLOW': '50000.0',
+#           'STOCK': '50000.0'}
+#          ]
+# data = {"rest": "update", "mode": "multi",
+#         "datas": json.dumps(datas)}
+# response = requests.post(url, data=data)
 
 # POST - delete
 # data = {"rest": "delete", "NUMBER": "2"}
