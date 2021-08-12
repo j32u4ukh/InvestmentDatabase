@@ -20,9 +20,7 @@
 		);
 		
 		$db->insert($datas);
-		$data = $db->tail(1);
-		$result = array("status"=>"success", 
-						"data"=>$data);
+		$result = $db->tail(1);
 						
 		echo "<p>" . json_encode($result) . "</p>";
 	}
@@ -32,11 +30,8 @@
 		
 		$datas = json_decode($post["datas"], true);
 		$n_data	= count($datas);	
-		$db->insert($datas);
-		
-		$datas = $db->tail($n_data);
-		$result = array("status"=>"success", 
-						"datas"=>$datas);
+		$db->insert($datas);		
+		$result = $db->tail($n_data);
 						
 		echo "<p class='api'>" . json_encode($result) . "</p>";
 	}

@@ -165,6 +165,7 @@ class TradeRecordApi(InvestmentApi):
             super().deleteData({"rest": "delete", "NUMBER": str(data)})
 
 
+# TODO: 盡可能使用複合鍵，目前的 primary key 不夠穩健
 class CapitalApi(InvestmentApi):
     class EType(Enum):
         NoneTpye = None
@@ -195,8 +196,11 @@ class CapitalApi(InvestmentApi):
                 "REMARK": remark}
         self.add_buffer.append(data)
 
-    def read(self, mode="all", start_time=None, end_time=None, user=None, capital_type: EType = EType.NoneTpye):
+    # TODO: 增加 limit
+    def read(self, mode="all", limit=None, start_time=None, end_time=None, user=None,
+             capital_type: EType = EType.NoneTpye):
         datas = {"mode": mode}
+        self.formDatas(datas, "limit", limit)
         self.formDatas(datas, "start_time", start_time)
         self.formDatas(datas, "end_time", end_time)
         self.formDatas(datas, "user", user)
@@ -207,16 +211,17 @@ class CapitalApi(InvestmentApi):
         return super().read(datas)
 
     # 允許部分項目為空
-    def updateBuffer(self, time: str = None, user: str = None, capital_type: EType = EType.NoneTpye,
+    # TODO: 特化成其他所有欄位作為 where 的組合鍵
+    def updateBuffer(self, number: str, time: str = None, user: str = None, capital_type: EType = EType.NoneTpye,
                      flow: str = None, stock: str = None, remark: str = None) -> None:
-        data = {}
+        data = {"NUMBER": number}
 
-        self.formDatas(data, "STOCK_ID", time)
-        self.formDatas(data, "BUY_TIME", user)
-        self.formDatas(data, "SELL_TIME", capital_type.value)
-        self.formDatas(data, "BUY_PRICE", flow)
-        self.formDatas(data, "SELL_PRICE", stock)
-        self.formDatas(data, "VOL", remark)
+        self.formDatas(data, "TIME", time)
+        self.formDatas(data, "USER", user)
+        self.formDatas(data, "TYPE", capital_type.value)
+        self.formDatas(data, "FLOW", flow)
+        self.formDatas(data, "STOCK", stock)
+        self.formDatas(data, "REMARK", remark)
 
         self.update_buffer.append(data)
 

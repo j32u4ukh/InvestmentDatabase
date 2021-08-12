@@ -1,29 +1,32 @@
 <?php
 	include_once ($_SERVER['DOCUMENT_ROOT'] . "/database/database.php");
-	include_once ($_SERVER['DOCUMENT_ROOT'] . "/database/capital.php");
+	include_once ($_SERVER['DOCUMENT_ROOT'] . "/database/inventory.php");
 	include_once ($_SERVER['DOCUMENT_ROOT'] . "/utils.php");
 	
 	function read($get){
-		$db = new Capital();
+		$db = new Inventory();
 		$mode = $get["mode"];		
-		$limit = defaultMapValue($get, "limit", 5);
+		$limit = defaultMapValue($get, "limit", null);
 		
 		$where = array();
 		
-		if(array_key_exists("start_time", $get)){
-			$where[] = Database::sqlGe("TIME", "'" . $get["start_time"] . "'");
+		if(array_key_exists("start_buy", $get)){
+			$where[] = Database::sqlGe("BUY_TIME", $get["start_buy"]);
 		}
 		
-		if(array_key_exists("end_time", $get)){
-			$where[] = Database::sqlLe("TIME", "'" . $get["end_time"] . "'");
+		if(array_key_exists("end_buy", $get)){
+			$where[] = Database::sqlLe("BUY_TIME", $get["end_buy"]);
 		}
 		
-		if(array_key_exists("user", $get)){
-			$where[] = Database::sqlEq("USER", "'" . $get["user"] . "'");
-		}
-		
-		if(array_key_exists("type", $get)){
-			$where[] = Database::sqlEq("TYPE", "'" . $get["type"] . "'");
+		if(array_key_exists("stock_id", $get)){
+			$stock_ids = explode(',', $get["stock_id"]);
+			$stock_list = array();
+			
+			foreach($stock_ids as $stock_id){
+				$stock_list[] = Database::sqlEq("STOCK_ID", $stock_id);
+			}
+			
+			$where[] = "(" . Database::sqlOr($stock_list) . ")";
 		}
 		
 		$sql_where = null;

@@ -49,5 +49,11 @@
 			
 			return $values_prepare;
 		}
+		
+		public function insert($datas, $table=null){
+			$datas = $this->insertFilter($datas);
+			
+			parent::insert($datas);
+		}
 	}
 ?>

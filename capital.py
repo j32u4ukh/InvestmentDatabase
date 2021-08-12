@@ -1,50 +1,94 @@
 from api import CapitalApi
+import datetime
+from decimal import Decimal, ROUND_HALF_UP
 
 api = CapitalApi()
 
+
+def updateReEvenu(time, remark, str_total_revenu):
+    administrator = "j32u4ukh"
+    users = ["ahuayeh"]
+
+    current_time = datetime.datetime.strptime(time, '%Y/%m/%d')
+    total_revenu = Decimal(str_total_revenu)
+
+    last_time = current_time - datetime.timedelta(days=1)
+    stock_dict = {}
+    rate_dict = {}
+    total_rate_stock = Decimal("0")
+    cum_revenu = Decimal("0")
+
+    results = api.read(user=administrator, end_time=f"{last_time}")
+    result = results[0]
+    stock = Decimal(result[-1]["STOCK"])
+    rate_dict[administrator] = stock
+    total_rate_stock += stock
+
+    results = api.read(user=administrator, end_time=f"{current_time}")
+    result = results[0]
+    stock = Decimal(result[-1]["STOCK"])
+    stock_dict[administrator] = stock
+
+    for user in users:
+        results = api.read(user=user, end_time=f"{last_time}")
+        result = results[0]
+        stock = Decimal(result[-1]["STOCK"])
+        rate_dict[user] = stock
+        total_rate_stock += stock
+
+        results = api.read(user=user, end_time=f"{current_time}")
+        result = results[0]
+        stock = Decimal(result[-1]["STOCK"])
+        stock_dict[user] = stock
+
+    for user in users:
+        stock = rate_dict[user]
+        rate_dict[user] = stock / total_rate_stock
+
+    stock = rate_dict[administrator]
+    rate_dict[administrator] = stock / total_rate_stock
+
+    for user in users:
+        print(f"time: {datetime.datetime.strftime(current_time, '%Y-%m-%d')}")
+        print(f"user: {user}")
+        stock = stock_dict[user]
+        rate = rate_dict[user]
+        print(f"rate: {rate}")
+        user_revenu = (total_revenu * rate).quantize(Decimal('0'), ROUND_HALF_UP)
+        cum_revenu += user_revenu
+        print(f"revenu: {user_revenu}")
+        stock += user_revenu
+        print(f"stock: {stock}")
+        api.addBuffer(time=datetime.datetime.strftime(current_time, '%Y-%m-%d'),
+                      user=user,
+                      capital_type=CapitalApi.EType.Revenu,
+                      flow=str(user_revenu),
+                      stock=str(stock),
+                      remark=remark)
+        print()
+
+    print(f"time: {datetime.datetime.strftime(current_time, '%Y-%m-%d')}")
+    print(f"user: {administrator}")
+    stock = stock_dict[administrator]
+    user_revenu = total_revenu - cum_revenu
+    print(f"revenu: {user_revenu}")
+    stock += user_revenu
+    print(f"stock: {stock}")
+    api.addBuffer(time=datetime.datetime.strftime(current_time, '%Y-%m-%d'),
+                  user=administrator,
+                  capital_type=CapitalApi.EType.Revenu,
+                  flow=str(user_revenu),
+                  stock=str(stock),
+                  remark=remark)
+
+    api.add()
+
+
+"""																
 """
-日期	柏緯投資	柏緯損益	媽媽投資	媽媽損益	柏緯資金	媽媽資金	總資金	柏緯比例	媽媽比例	售出股票	售出損益						備註
-2021/06/29	30000	0	50000	0	449060	99700	548760	0.8183176616	0.1816823384
 
-2021/06/30	0	-1795	0	-399	447265	99301	546566	0.8183183733	0.1816816267	1732毛寶	-2194																								
-
-2021/07/01	0	0	100000	0	447265	199301	646566	0.6917545927	0.3082454073																										
-
-2021/07/06	0	-95	0	-42	447170	199259	646429	0.6917542375	0.3082457625	1417嘉裕	-137																								
-
-2021/07/12	0	-737	0	-329	446433	198930	645363	0.6917548728	0.3082451272	2885元大金	-1066
-
-2021/07/13	0	-1049	0	-467	445384	198463	643847	0.6917544075	0.3082455925	2390云辰	-1516																								
-2021/07/13	0	-870	0	-388	444514	198075	642589	0.6917547608	0.3082452392	6172互億	-1258																								
-2021/07/13	0	7431	0	3311	451945	201386	653331	0.6917550216	0.3082449784	8478東哥遊艇	10742																								
-
-2021/07/20	0	1096	0	488	453041	201874	654915	0.6917554186	0.3082445814	2392正崴	1584																								
-
-2021/07/22	0	2414	0	1076	455455	202950	658405	0.6917550748	0.3082449252	8213志超(股利)	3490																								
-2021/07/22	0	823	0	367	456278	203317	659595	0.6917547889	0.3082452111	2885元大金(股利)	1190																								
-
-2021/07/27	0	-592	0	-264	455686	203053	658739	0.6917550046	0.3082449954	00639富邦深100	-856																								
-
-2021/07/28	0	-1007	0	-449	454679	202604	657283	0.6917553017	0.3082446983	00739元大MSCI A股	-1456																								
-2021/07/28	0	1227	0	547	455906	203151	659057	0.6917550379	0.3082449621	8103瀚荃	1774																								
-2021/07/28	0	5125	0	2283	461031	205434	666465	0.6917557561	0.3082442439	4942嘉彰	7408																								
-2021/07/28	0	-1703	0	-759	459328	204675	664003	0.6917559107	0.3082440893	8478東哥遊艇	-2462																								
-"""
-
-# result = api.read(mode="all", user="j32u4ukh")
-
-# api.addBuffer(time="2021/06/29", user="j32u4ukh", capital_type=CapitalApi.EType.Revenu, flow="-2535", stock="419060",
-#               remark="8213志超")
-# api.addBuffer(time="2021/06/29", user="ahuayeh", capital_type=CapitalApi.EType.Revenu, flow="-300", stock="49700",
-#               remark="8213志超")
-
-# 2021/06/29	30000	0	50000	0	449060	99700	548760
-api.addRawDataBuffer(raw_data="2021-06-29,j32u4ukh,capital,30000,449060,")
-api.addRawDataBuffer(raw_data="2021-06-29,ahuayeh,capital,50000,99700,")
-api.add()
-
-# api.updateBuffer("3", "1310", "2021-03-24", "2021-04-21", "19.05", "21.65", "1", "19070.00", "84", "2496.00")
-# api.updateBuffer("4", "2012", "2021-03-23", "2021-04-23", "19.95", "25.10", "1", "19970.00", "95", "5232.00")
+# updateReEvenu(time="2021/08/10", remark="00646", str_total_revenu="393")
+# updateReEvenu(time="2021/08/10", remark="2390云辰", str_total_revenu="-1168")
 
 # 1310,2021-03-24,2021-04-21,19.05,21.65,1,19070.00,84,2496.00
 # 2012,2021-03-23,2021-04-23,19.95,25.10,1,19970.00,95,5232.00
@@ -55,7 +99,7 @@ api.add()
 # api.updateBuffer("6", "2419", "2021-04-28", "2021-05-03", "25.55", "23.55", "1", "25570.00", "90", "-2110.0")
 # api.delete(datas=[4, 5, 6])
 
-results = api.read()
+results = api.read(mode="tail")
 
 for result in results:
     if len(result) == 1:

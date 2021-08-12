@@ -232,8 +232,8 @@
 			}
 			
 			$values = implode(",", $values_array);
-			formatLog("values: $values");
-			print json_encode($data_array);
+			// formatLog("values: $values");
+			// print json_encode($data_array);
 			
 			// INSERT IGNORE INTO table_name (KEY1, KEY2) VALUES (:KEY1, :KEY2), (:KEY1, :KEY2), (:KEY1, :KEY2);
 			$this->sql = "INSERT IGNORE INTO `$this->table` ($columns) VALUES $values;";
@@ -243,6 +243,20 @@
 			$result->execute($data_array);
 			
 			$this->last_id = $this->db->lastInsertId();
+		}
+		
+		public function insertFilter($datas){
+			$filter = array();
+			
+			foreach($datas as $data){
+				$is_exists = $this->isExists($data);
+				
+				if(!$is_exists){
+					$filter[] = $data;
+				}
+			}
+			
+			return $filter;
 		}
 
 		// 讀取資料表
@@ -297,6 +311,15 @@
 			} catch(PDOException $e) {
 				formatLog("Error: " . $e->getMessage());
 			}
+		}
+		
+		public function isExists($where_list = array()){
+			$where = Database::sqlAnd($where_list);
+			
+			$results = $this->select(null, null, $where, null, null, null, 0);
+			$n_data = count($results);
+			
+			return $n_data > 0;
 		}
 		
 		// 高階 select 傳入參數為 array，使得參數使用更為彈性
