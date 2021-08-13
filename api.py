@@ -297,7 +297,7 @@ class StockListApi(InvestmentApi):
         split_data = raw_data.split(",")
         data = {"STOCK_ID": str(split_data[0]),
                 "NAME": str(split_data[1]),
-                "PRICE": str(split_data[3])}
+                "PRICE": str(split_data[2])}
 
         return data
 
@@ -332,4 +332,67 @@ class StockListApi(InvestmentApi):
 
     def deleteBuffer(self, key):
         buffer_data = {"rest": "delete", "STOCK_ID": str(key)}
+        self.deleteDataBuffer(buffer_data)
+
+
+class DayOhlcApi(InvestmentApi):
+    def __init__(self, stock_id):
+        super().__init__(endpoint="https://webcapitalapiinvestment.000webhostapp.com/day_ohlcs/")
+        self.stock_id = stock_id
+
+    @staticmethod
+    def splitRawData(raw_data: str) -> dict:
+        split_data = raw_data.split(",")
+        data = {"TIME": str(split_data[0]),
+                "OPEN": str(split_data[1]),
+                "HIGH": str(split_data[2]),
+                "LOW": str(split_data[3]),
+                "CLOSE": str(split_data[4]),
+                "VOL": str(split_data[5])}
+
+        return data
+
+    def read(self, mode="all", limit=None, start_time=None, end_time=None):
+        datas = {"mode": mode, "stock_id": self.stock_id}
+        self.formDatas(datas, "limit", limit)
+        self.formDatas(datas, "start_time", start_time)
+        self.formDatas(datas, "end_time", end_time)
+        print(datas)
+
+        return super().read(datas)
+
+    def addData(self, datas) -> list:
+        data = {"rest": "add", "mode": "multi", "stock_id": self.stock_id, "datas": json.dumps(datas)}
+        response = requests.post(self.endpoint, data=data)
+        return self.execute(response)
+
+    def addBuffer(self, time: str, open_price: str, high_price: str, low_price: str, close_price: str,
+                  volumn: str) -> None:
+        data = {"TIME": time,
+                "OPEN": open_price,
+                "HIGH": high_price,
+                "LOW": low_price,
+                "CLOSE": close_price,
+                "VOL": volumn}
+        self.add_buffer.append(data)
+
+    def updateData(self, datas) -> list:
+        data = {"rest": "update", "mode": "multi", "stock_id": self.stock_id, "datas": json.dumps(datas)}
+        response = requests.post(self.endpoint, data=data)
+        return self.execute(response)
+
+    def updateBuffer(self, time: str, open_price: str = None, high_price: str = None, low_price: str = None,
+                     close_price: str = None, volumn: str = None) -> None:
+        data = {"TIME": time}
+
+        self.formDatas(data, "OPEN", open_price)
+        self.formDatas(data, "HIGH", high_price)
+        self.formDatas(data, "LOW", low_price)
+        self.formDatas(data, "CLOSE", close_price)
+        self.formDatas(data, "VOL", volumn)
+
+        self.update_buffer.append(data)
+
+    def deleteBuffer(self, key):
+        buffer_data = {"rest": "delete", "stock_id": self.stock_id, "TIME": str(key)}
         self.deleteDataBuffer(buffer_data)

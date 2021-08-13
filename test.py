@@ -8,10 +8,10 @@ from pprint import pprint
 from random import randint
 import time
 
-url = "https://webcapitalapiinvestment.000webhostapp.com/stock_lists/"
+url = "https://webcapitalapiinvestment.000webhostapp.com/day_ohlcs/"
 
 # GET
-# params = {"mode": "all", "min": "60.0", "max": "200.0", "sort": "0"}
+# params = {"mode": "all", "stock_id": "2330"}
 # response = requests.get(url, params=params)
 # print("response.url:", response.url)
 
@@ -19,8 +19,19 @@ url = "https://webcapitalapiinvestment.000webhostapp.com/stock_lists/"
 # data = {"rest": "add", "mode": "one", "STOCK_ID": "6172", "PRICE": "42.00"}
 
 # POST - add(mode: multi)
-# datas = [{"STOCK_ID": "3558", "NAME": "", "PRICE": "423.00"}]
-# data = {"rest": "add", "mode": "multi",
+# datas = [{'TIME': '2021-01-01',
+#           'OPEN': '10',
+#           'HIGH': '20',
+#           'LOW': '8',
+#           'CLOSE': '15',
+#           'VOL': 345},
+#          {'TIME': '2021-01-02',
+#           'OPEN': '15',
+#           'HIGH': '21',
+#           'LOW': '13',
+#           'CLOSE': '18',
+#           'VOL': 455}]
+# data = {"rest": "add", "mode": "multi", "stock_id": "2330",
 #         "datas": json.dumps(datas)}
 # response = requests.post(url, data=data)
 
@@ -29,17 +40,14 @@ url = "https://webcapitalapiinvestment.000webhostapp.com/stock_lists/"
 # response = requests.post(url, data=data)
 
 # POST - update(mode: multi)
-datas = [{'STOCK_ID': '3458',
-          'NAME': 'NTNU1'},
-         {'STOCK_ID': '3558',
-          'NAME': 'NTNU2'}
-         ]
-data = {"rest": "update", "mode": "multi",
+datas = [{'TIME': '2021-01-01', 'OPEN': '16', 'VOL': '340'},
+         {'TIME': '2021-01-02', 'OPEN': '18', 'VOL': '355'}]
+data = {"rest": "update", "mode": "multi", "stock_id": "00646",
         "datas": json.dumps(datas)}
 response = requests.post(url, data=data)
 
 # POST - delete
-# data = {"rest": "delete", "STOCK_ID": "3458"}
+# data = {"rest": "delete", "stock_id": "00757", "TIME": "2021-01-03"}
 # response = requests.post(url, data=data)
 
 if response.status_code == requests.codes.ok:
