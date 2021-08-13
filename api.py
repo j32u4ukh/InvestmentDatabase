@@ -228,3 +228,52 @@ class CapitalApi(InvestmentApi):
     def deleteDatas(self, datas):
         for data in datas:
             super().deleteData({"rest": "delete", "NUMBER": str(data)})
+
+
+class InventoryApi(InvestmentApi):
+    def __init__(self):
+        super().__init__(endpoint="https://webcapitalapiinvestment.000webhostapp.com/inventories/")
+
+    @staticmethod
+    def splitRawData(raw_data: str) -> dict:
+        split_data = raw_data.split(",")
+        data = {"GUID": str(split_data[0]),
+                "TIME": str(split_data[1]),
+                "STOCK_ID": str(split_data[2]),
+                "PRICE": str(split_data[3])}
+
+        return data
+
+    def read(self, mode="all", limit=None, start_buy=None, end_buy=None, stocks: list = None):
+        datas = {"mode": mode}
+        self.formDatas(datas, "limit", limit)
+        self.formDatas(datas, "start_buy", start_buy)
+        self.formDatas(datas, "end_buy", end_buy)
+
+        if stocks is not None:
+            stock_id = ",".join(stocks)
+            self.formDatas(datas, "stock_id", stock_id)
+
+        print(datas)
+
+        return super().read(datas)
+
+    def addBuffer(self, guid: str, time: str, stock_id: str, price: str) -> None:
+        data = {"GUID": guid,
+                "TIME": time,
+                "STOCK_ID": stock_id,
+                "PRICE": price}
+        self.add_buffer.append(data)
+
+    def updateBuffer(self, guid: str, time: str = None, stock_id: str = None, price: str = None) -> None:
+        data = {"GUID": guid}
+
+        self.formDatas(data, "TIME", time)
+        self.formDatas(data, "STOCK_ID", stock_id)
+        self.formDatas(data, "PRICE", price)
+
+        self.update_buffer.append(data)
+
+    def deleteDatas(self, datas):
+        for data in datas:
+            super().deleteData({"rest": "delete", "GUID": str(data)})
