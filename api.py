@@ -88,12 +88,21 @@ class InvestmentApi(metaclass=ABCMeta):
         data = self.splitRawData(raw_data)
         self.update_buffer.append(data)
 
-    def deleteData(self, data) -> list:
-        response = requests.post(self.endpoint, data=data)
-        return self.execute(response)
+    def delete(self):
+        results = []
+
+        for data in self.delete_buffer:
+            response = requests.post(self.endpoint, data=data)
+            result = self.execute(response)
+            results.append(result)
+
+        return results
+
+    def deleteDataBuffer(self, data) -> None:
+        self.delete_buffer.append(data)
 
     @abstractmethod
-    def deleteDatas(self, datas):
+    def deleteBuffer(self, key):
         pass
 
 
@@ -160,9 +169,9 @@ class TradeRecordApi(InvestmentApi):
 
         self.update_buffer.append(data)
 
-    def deleteDatas(self, datas):
-        for data in datas:
-            super().deleteData({"rest": "delete", "NUMBER": str(data)})
+    def deleteBuffer(self, key):
+        buffer_data = {"rest": "delete", "NUMBER": str(key)}
+        self.deleteDataBuffer(buffer_data)
 
 
 # TODO: 盡可能使用複合鍵，目前的 primary key 不夠穩健
@@ -225,9 +234,9 @@ class CapitalApi(InvestmentApi):
 
         self.update_buffer.append(data)
 
-    def deleteDatas(self, datas):
-        for data in datas:
-            super().deleteData({"rest": "delete", "NUMBER": str(data)})
+    def deleteBuffer(self, key):
+        buffer_data = {"rest": "delete", "NUMBER": str(key)}
+        self.deleteDataBuffer(buffer_data)
 
 
 class InventoryApi(InvestmentApi):
@@ -274,6 +283,53 @@ class InventoryApi(InvestmentApi):
 
         self.update_buffer.append(data)
 
-    def deleteDatas(self, datas):
-        for data in datas:
-            super().deleteData({"rest": "delete", "GUID": str(data)})
+    def deleteBuffer(self, key):
+        buffer_data = {"rest": "delete", "GUID": str(key)}
+        self.deleteDataBuffer(buffer_data)
+
+
+class StockListApi(InvestmentApi):
+    def __init__(self):
+        super().__init__(endpoint="https://webcapitalapiinvestment.000webhostapp.com/stock_lists/")
+
+    @staticmethod
+    def splitRawData(raw_data: str) -> dict:
+        split_data = raw_data.split(",")
+        data = {"STOCK_ID": str(split_data[0]),
+                "NAME": str(split_data[1]),
+                "PRICE": str(split_data[3])}
+
+        return data
+
+    def read(self, mode="all", limit=None, min_price=None, max_price=None, positive_order=True):
+        datas = {"mode": mode}
+        self.formDatas(datas, "limit", limit)
+        self.formDatas(datas, "min", min_price)
+        self.formDatas(datas, "max", max_price)
+
+        if positive_order:
+            datas["sort"] = "1"
+        else:
+            datas["sort"] = "0"
+
+        print(datas)
+
+        return super().read(datas)
+
+    def addBuffer(self, stock_id: str, price: str, name: str = "") -> None:
+        data = {"STOCK_ID": stock_id,
+                "NAME": name,
+                "PRICE": price}
+        self.add_buffer.append(data)
+
+    def updateBuffer(self, stock_id: str, name: str = None, price: str = None) -> None:
+        data = {"STOCK_ID": stock_id}
+
+        self.formDatas(data, "NAME", name)
+        self.formDatas(data, "PRICE", price)
+
+        self.update_buffer.append(data)
+
+    def deleteBuffer(self, key):
+        buffer_data = {"rest": "delete", "STOCK_ID": str(key)}
+        self.deleteDataBuffer(buffer_data)

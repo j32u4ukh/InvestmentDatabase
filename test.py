@@ -8,40 +8,38 @@ from pprint import pprint
 from random import randint
 import time
 
-url = "https://webcapitalapiinvestment.000webhostapp.com/inventories/"
+url = "https://webcapitalapiinvestment.000webhostapp.com/stock_lists/"
 
 # GET
-# params = {"mode": "all", "stock_id": "2812"}
+# params = {"mode": "all", "min": "60.0", "max": "200.0", "sort": "0"}
 # response = requests.get(url, params=params)
 # print("response.url:", response.url)
 
 # POST - add(mode: one)
-# data = {"rest":"add", "mode": "one", "stock_id": "5519", "buy_time": "2021-04-07", "sell_time": "2021-05-04",
-#         "buy_price": "19.10", "sell_price": "22.25", "vol": "1",
-#         "buy_cost": "19120.0", "sell_cost": "86", "revenue": "3044.00"}
+# data = {"rest": "add", "mode": "one", "STOCK_ID": "6172", "PRICE": "42.00"}
 
 # POST - add(mode: multi)
-# datas = [{"GUID": "2b0232374d954a5cb1fcb735045cb20d", "TIME": "2021-07-22", "STOCK_ID": "6172", "PRICE": "42.00"}]
+# datas = [{"STOCK_ID": "3558", "NAME": "", "PRICE": "423.00"}]
 # data = {"rest": "add", "mode": "multi",
 #         "datas": json.dumps(datas)}
 # response = requests.post(url, data=data)
 
 # POST - update(mode: one)
-data = {"rest": "update", "mode": "one", "GUID": "2b0232374d954a5cb1fcb735045cb20d", "PRICE": "42.00"}
-response = requests.post(url, data=data)
-
-# POST - update(mode: multi)
-# datas = [{'GUID': '2b0232374d954a5cb1fcb735045cb20d',
-#           'PRICE': '42.0'},
-#          {'GUID': 'c0a5e6f5c3544da4b7857beaceee55c1',
-#           'PRICE': '21.20'}
-#          ]
-# data = {"rest": "update", "mode": "multi",
-#         "datas": json.dumps(datas)}
+# data = {"rest": "update", "mode": "one", "GUID": "2b0232374d954a5cb1fcb735045cb20d", "PRICE": "42.00"}
 # response = requests.post(url, data=data)
 
+# POST - update(mode: multi)
+datas = [{'STOCK_ID': '3458',
+          'NAME': 'NTNU1'},
+         {'STOCK_ID': '3558',
+          'NAME': 'NTNU2'}
+         ]
+data = {"rest": "update", "mode": "multi",
+        "datas": json.dumps(datas)}
+response = requests.post(url, data=data)
+
 # POST - delete
-# data = {"rest": "delete", "GUID": "2b0232374d954a5cb1fcb735045cb20d"}
+# data = {"rest": "delete", "STOCK_ID": "3458"}
 # response = requests.post(url, data=data)
 
 if response.status_code == requests.codes.ok:

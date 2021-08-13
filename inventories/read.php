@@ -6,7 +6,7 @@
 	function read($get){
 		$db = new Inventory();
 		$mode = $get["mode"];		
-		$limit = defaultMapValue($get, "limit", null);
+		$limit = defaultMapValue($get, "limit", 5);
 		
 		$where = array();
 		

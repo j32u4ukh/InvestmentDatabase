@@ -20,15 +20,13 @@
 		
 		public function getTable($table=null, $table_definition=null){			
 			$table_definition = "`STOCK_ID` VARCHAR(10) NOT NULL ,
-								 `NAME` VARCHAR(10) NOT NULL , 
+								 `NAME` VARCHAR(10) , 
 								 `PRICE` VARCHAR(10) NOT NULL , 
 								 PRIMARY KEY (`STOCK_ID`)";
-
+			$this->sql_columns = array("STOCK_ID", "NAME", "PRICE");
+			$this->sort_by = "PRICE";
+			$this->primary_keys = array("STOCK_ID");
 			parent::getTable($this->table, $table_definition);
-		}
-		
-		public function insert($datas, $table=null){
-			parent::insert($datas, $this->table);
 		}
 	}
 ?>

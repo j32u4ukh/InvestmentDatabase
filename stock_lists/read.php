@@ -1,32 +1,33 @@
 <?php
 	include_once ($_SERVER['DOCUMENT_ROOT'] . "/database/database.php");
-	include_once ($_SERVER['DOCUMENT_ROOT'] . "/database/trade_record.php");
+	include_once ($_SERVER['DOCUMENT_ROOT'] . "/database/stock_list.php");
 	include_once ($_SERVER['DOCUMENT_ROOT'] . "/utils.php");
 	
 	function read($get){
-		$db = new TradeRecord();
+		$db = new StockList();
 		$mode = $get["mode"];		
 		$limit = defaultMapValue($get, "limit", 5);
 		
 		$where = array();
 		
-		if(array_key_exists("start_buy", $get)){
-			$where[] = Database::sqlGe("BUY_TIME", $get["start_buy"]);
+		if(array_key_exists("min", $get)){
+			$where[] = Database::sqlGe("PRICE", $get["min"]);
 		}
 		
-		if(array_key_exists("end_buy", $get)){
-			$where[] = Database::sqlLe("BUY_TIME", $get["end_buy"]);
-		}
-		
-		if(array_key_exists("start_sell", $get)){
-			$where[] = Database::sqlGe("SELL_TIME", $get["start_sell"]);
-		}
-		
-		if(array_key_exists("end_sell", $get)){
-			$where[] = Database::sqlLe("SELL_TIME", $get["end_sell"]);
+		if(array_key_exists("max", $get)){
+			$where[] = Database::sqlLe("PRICE", $get["max"]);
 		}
 		
 		$sql_where = null;
+		
+		// True -> 正序; False -> 逆序
+		$positive_order = defaultMapValue($get, "sort", "1");
+		
+		if($positive_order == "1"){
+			$sort = "ASC";
+		}else{
+			$sort = "DESC";
+		}
 		
 		if(count($where) > 0){
 			$sql_where = Database::sqlAnd($where);
@@ -41,7 +42,7 @@
 				$datas = $db->tail($limit);
 				break;
 			case "all":
-				$datas = $db->query(array("where" => $sql_where));
+				$datas = $db->query(array("where" => $sql_where, "sort_type" => $sort));
 				break;
 		}
 		
