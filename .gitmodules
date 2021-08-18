@@ -1,0 +1,3 @@
+[submodule "submodule/InvestmentAPI"]
+	path = submodule/InvestmentAPI
+	url = https://github.com/j32u4ukh/InvestmentAPI.git
