@@ -5,7 +5,14 @@
 	
 	function read($get){
 		$db = new TradeRecord();
-		$mode = $get["mode"];		
+		$mode = $get["mode"];
+		
+		if($mode == "number"){
+			$number = $db->getNumber();
+			echo "<p class='api'>$number</p>";
+			return;
+		}
+		
 		$limit = defaultMapValue($get, "limit", 5);
 		
 		$where = array();

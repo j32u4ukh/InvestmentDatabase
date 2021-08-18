@@ -18,7 +18,7 @@
 		}
 		
 		public function getTable($table=null, $table_definition=null){	
-			$table_definition = "`NUMBER` VARCHAR(10) NOT NULL , 
+			$table_definition = "`NUMBER` INT(10) NOT NULL , 
 								 `STOCK_ID` VARCHAR(10) NOT NULL , 
 								 `BUY_TIME` VARCHAR(10) NOT NULL , 
 								 `SELL_TIME` VARCHAR(10) NOT NULL , 
@@ -36,23 +36,5 @@
 			
 			parent::getTable($this->table, $table_definition);
 		}
-		
-		// [TradeRecord] 為 INSERT 準備 Value 要插入的空格
-		// public function insertValues($data, $index){
-			// TradeRecord 的第一個欄位為 auto increment，無須自己給值就會自動遞增，指令上要傳入 NULL
-			// $temp = array("NULL");
-		
-			// foreach($data as $key => $value){
-				// $temp[] = ":$key" . "_" . $index;
-			// }
-			
-			// implode = join
-			// $values = implode(",", $temp);
-			
-			// (NULL, :STOCK_ID_i,:BUY_TIME_i,:SELL_TIME_i,:BUY_PRICE_i,:SELL_PRICE_i,:VOL_i,:BUY_COST_i,:SELL_COST_i,:REVENUE_i)
-			// $values_prepare = "($values)";
-			
-			// return $values_prepare;
-		// }
 	}
 ?>

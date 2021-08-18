@@ -367,6 +367,15 @@
 			
 			return $datas;
 		}
+		
+		public function getNumber(){
+			$this->sql = "SELECT COUNT(*) FROM $this->table";
+			$result = $this->db->prepare($this->sql);
+			$result->execute();
+			$number = $result->fetchAll()[0][0];
+			
+			return $number;
+		}
 				
 		// 更新 UPDATE `TRADE_RECORD` SET `SELL_PRICE` = '32.0' WHERE `TRADE_RECORD`.`NUMBER` = 1;
 		public function update($data_array) {			
