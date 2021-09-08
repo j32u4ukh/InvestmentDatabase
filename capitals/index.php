@@ -7,10 +7,10 @@
         <?php
             include_once ($_SERVER['DOCUMENT_ROOT'] . "/utils.php");
 			include_once ($_SERVER['DOCUMENT_ROOT'] . "/database/capital.php");
-			include_once ($_SERVER['DOCUMENT_ROOT'] . "/capitals1/read.php");
-			include_once ($_SERVER['DOCUMENT_ROOT'] . "/capitals1/add.php");
-			include_once ($_SERVER['DOCUMENT_ROOT'] . "/capitals1/update.php");
-			include_once ($_SERVER['DOCUMENT_ROOT'] . "/capitals1/delete.php");
+			include_once ($_SERVER['DOCUMENT_ROOT'] . "/capitals/read.php");
+			include_once ($_SERVER['DOCUMENT_ROOT'] . "/capitals/add.php");
+			include_once ($_SERVER['DOCUMENT_ROOT'] . "/capitals/update.php");
+			include_once ($_SERVER['DOCUMENT_ROOT'] . "/capitals/delete.php");
 			
 			$db = new Capital();
 			

@@ -7,7 +7,7 @@
 		$params = array();		
 		$number = $post["NUMBER"];
 		
-		$db = new Capital(2);
+		$db = new Capital();
 		$db->delete(array("NUMBER"=>$number));
 		
 		$where = Database::sqlEq("NUMBER", "'" . $number . "'");

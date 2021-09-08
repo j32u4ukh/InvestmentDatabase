@@ -4,7 +4,7 @@
 	include_once ($_SERVER['DOCUMENT_ROOT'] . "/utils.php");
 	
 	function read($get){
-		$db = new Capital(2);
+		$db = new Capital();
 		$mode = $get["mode"];		
 		$limit = defaultMapValue($get, "limit", 5);
 		

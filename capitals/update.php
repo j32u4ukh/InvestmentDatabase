@@ -18,7 +18,7 @@
 		$params = updateParams($post, "STOCK", $params);
 		$params = updateParams($post, "REMARK", $params);
 		
-		$db = new Capital(1);
+		$db = new Capital();
 		$db->update($params);
 		
 		$datas = $db->query(array("where" => Database::sqlEq("NUMBER", "'" . $number . "'")));
@@ -37,7 +37,7 @@
 	function updateMultiDatas($post){
 		$datas = json_decode($post["datas"], true);
 		
-		$db = new Capital(1);
+		$db = new Capital();
 		$where = $db->updates($datas);
 		
 		$datas = $db->query(array("where" => $where));

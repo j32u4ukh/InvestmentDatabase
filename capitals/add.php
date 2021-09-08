@@ -4,7 +4,7 @@
 	include_once ($_SERVER['DOCUMENT_ROOT'] . "/utils.php");
 	
 	function add($post){
-		$db = new Capital(1);
+		$db = new Capital();
 		
 		$time = $post["TIME"];
 		$user = $post["USER"];
@@ -26,7 +26,7 @@
 	}
 	
 	function addMultiDatas($post){
-		$db = new Capital(1);
+		$db = new Capital();
 		
 		$datas = json_decode($post["datas"], true);
 		$n_data	= count($datas);	

@@ -5,8 +5,8 @@
 	class Capital extends Database{
 		
 		// 建構子從 access.txt 讀取連接資料庫所需資訊
-		public function __construct($version = 1){
-			$this->table = "CAPITAL$version";
+		public function __construct(){
+			$this->table = "CAPITAL";
 			$access = connectAccess();
 			parent::__construct($access["server"], $access["user"], $access["password"], $access["database"]);
 			$this->getTable($this->table);
