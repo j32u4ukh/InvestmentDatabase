@@ -172,19 +172,7 @@
 		}
 		
 		// TODO: 檢查資料表是否存在 https://stackoverflow.com/questions/1717495/check-if-a-database-table-exists-using-php-pdo
-		
-		// // 為 INSERT 準備 sql 指令與欄位
-		// public function insertColumns($table, $data){
-			// $temp = array();
-		
-			// foreach($data as $key => $value){
-				// $temp[] = $key;
-			// }
-			
-			// // implode = join			
-			// return implode(",", $temp);
-		// }
-		
+
 		// 為 INSERT 準備 Value 要插入的空格
 		public function insertValues($data, $index){
 			// (:house_id_{$n},:room_name_{$n},:monthly_rental_amount_{$n},:security_deposit_amount_{$n},:room_floor_{$n})
@@ -259,7 +247,7 @@
 			return $filter;
 		}
 
-		// 讀取資料表
+		// 讀取資料表1
 		public function select($table=null, $columns=null, $where=null, $sort_by=null, $sort_type="ASC", 
 							   $limit=null, $offset=0){
 			/*將 table_name 結果按 column_name [ 升序 | 降序 ] 排序
@@ -313,6 +301,90 @@
 			}
 		}
 		
+		// 讀取資料表2 
+		public function read($params = array())
+		{
+			/* 將 table 結果按 $columns [ 升序 | 降序 ] 排序
+			SELECT $columns
+			FROM table_name
+			WHERE $where
+			ORDER BY $columns[0] [ASC | DESC], $columns[1] [ASC | DESC]
+			LIMIT $limit OFFSET $offset;
+			
+			和 function select 的主要差異:
+			1. 不需要傳入 $table，直接使用 $this->table
+			2. 允許使用多個 $sort_by 欄位
+
+			:param table_name: 表格名稱
+			:param columns: 欄位名稱
+			:param where: 篩選條件
+			:param sort_by: 排須依據哪些欄位
+			:param sort_type: 升序(ASC) | 降序(DESC)
+			:param limit: 限制從表格中提取的行數
+			:param offset: 從第幾筆數據開始呈現(從 0 開始數)
+			:return:
+			*/
+			$columns = defaultMapValue($params, "columns", null);
+			$where = defaultMapValue($params, "where", null);
+			$sort_by = defaultMapValue($params, "sort_by", $this->sort_by);
+			$sort_type = defaultMapValue($params, "sort_type", "ASC");
+			$limit = defaultMapValue($params, "limit", null);
+			$offset = defaultMapValue($params, "offset", 0);
+			
+			$format_columns = $this->formatColumns($columns);
+			
+			if(is_null($where)){
+				$where = "";
+			}else{
+				$where = "WHERE $where";
+			}
+			
+			$sort_columns = array();
+			
+			foreach($sort_by as $sby){
+				$sort_columns[] = "$sby $sort_type";
+			}
+			
+			$sort = "ORDER BY " . implode(", ", $sort_columns);
+			
+			// LIMIT & OFFSET 似乎必須一起使用
+			if(is_null($limit)){
+				$limit_offset = "";
+			}else{
+				$limit_offset = "LIMIT $limit OFFSET $offset";
+			}
+			
+			$this->sql = "SELECT $format_columns FROM $this->table $where $sort $limit_offset;";
+			formatLog("sql: $this->sql");
+			
+			try {
+				$cursor = $this->db->prepare($this->sql);
+				$cursor->execute();				
+				$results = $cursor->fetchAll();
+				
+				$datas = array();
+				
+				foreach($results as $result){
+					$data = array();
+					
+					// 將欄位名稱對應的數據加入 $data
+					foreach($result as $key => $value){
+						if(in_array($key, $this->sql_columns, true)){
+							$data[$key] = $value;
+						}
+					}
+					
+					// 將每一筆 $data 加入 $datas
+					$datas[] = $data;
+				}
+				
+				return $datas;
+				
+			} catch(PDOException $e) {
+				formatLog("Error: " . $e->getMessage());
+			}
+		}
+		
 		public function isExists($where_list = array()){
 			$where = Database::sqlAnd($where_list);
 			
@@ -324,9 +396,9 @@
 		
 		// 高階 select 傳入參數為 array，使得參數使用更為彈性
 		public function query($params = array()){
-			$columns = defaultMapValue($params, "colums", null);
+			$columns = defaultMapValue($params, "columns", null);
 			$where = defaultMapValue($params, "where", null);
-			$sort_by = defaultMapValue($params, "sort_by", $this->sort_by);
+			$sort_by = defaultMapValue($params, "sort_by", $this->sort_by[0]);
 			$sort_type = defaultMapValue($params, "sort_type", "ASC");
 			$limit = defaultMapValue($params, "limit", null);
 			$offset = defaultMapValue($params, "offset", 0);
@@ -469,6 +541,50 @@
 			return $sql_set;
 		}
 		
+		public function renumber($start = 1)
+		{
+			// 此函示僅可應用於 CAPITAL 和 TRADE_RECORD
+			if($this->table != "CAPITAL" and $this->table != "TRADE_RECORD"){
+				return;
+			}
+			
+			// 預設根據各個資料表的 $this->sort_by 進行排序(允許使用多個欄位進行排序)
+			$datas = $this->read();
+			$where_list = array();			
+			$update_number = array();
+			
+			foreach($datas as $data)
+			{
+				foreach($data as $key => $value)
+				{
+    				if($key == "NUMBER"){
+						$origin = "NUMBER = $value";
+						$where_list[] = $origin;
+						
+						$update_number[$origin] = $start;
+						
+						$start++;
+    				}
+    			}
+			}
+			
+			$set = "NUMBER = CASE ";
+
+			foreach($update_number as $where => $setting){
+				$set .= "WHEN $where THEN $setting ";
+			}
+			
+			$set .= "ELSE NUMBER END";
+			$where = Database::sqlor($where_list);					
+			
+			$this->sql = "UPDATE $this->table SET $set WHERE $where;";
+
+			$result = $this->db->prepare($this->sql);
+			$result->execute();
+			
+			return $where;
+		}
+		
 		/**
 		 * 這段可以刪除資料庫中的資料
 		 
@@ -497,29 +613,29 @@
 			$result->execute();
 		}
 
-		/**
-		 * @return string
-		 * 這段會把最後執行的語法回傳給你
-		 */
-		public function getLastSql() {
-			return $this->sql;
-		}
+		// /**
+		 // * @return string
+		 // * 這段會把最後執行的語法回傳給你
+		 // */
+		// public function getLastSql() {
+			// return $this->sql;
+		// }
 
-		/**
-		 * @return int
-		 * 主要功能是把新增的 ID 傳到物件外面
-		 */
-		public function getLastId() {
-			return $this->db->lastInsertId();
-		}
+		// /**
+		 // * @return int
+		 // * 主要功能是把新增的 ID 傳到物件外面
+		 // */
+		// public function getLastId() {
+			// return $this->db->lastInsertId();
+		// }
 		
-		/**
-		 * @return string
-		 * 取出物件內的錯誤訊息
-		 */
-		public function getErrorMessage()
-		{
-			return $this->error_message;
-		}
+		// /**
+		 // * @return string
+		 // * 取出物件內的錯誤訊息
+		 // */
+		// public function getErrorMessage()
+		// {
+			// return $this->error_message;
+		// }
 	}
 ?>

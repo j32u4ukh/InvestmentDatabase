@@ -33,11 +33,15 @@
 					case "update":
 						$mode = $_POST["mode"];
 						
-						if($mode == "one"){
-							update($_POST);
-							
-						}else{
-							updateMultiDatas($_POST);
+						switch($mode){
+						    case "one":
+						       update($_POST);
+						       break;
+						    case "renumber":
+						        renumber();
+						    default:
+						        updateMultiDatas($_POST);
+						        break;
 						}
 						
 						break;

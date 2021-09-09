@@ -3,6 +3,32 @@
 	include_once ($_SERVER['DOCUMENT_ROOT'] . "/database/database.php");
 	include_once ($_SERVER['DOCUMENT_ROOT'] . "/database/trade_record.php");
 	
+	function renumber(){
+		$db = new TradeRecord();
+		
+		// 取得最大 NUMBER
+		$datas = $db->read();
+		$max_number = 0;
+				
+		foreach($datas as $data)
+		{
+			foreach($data as $key => $value)
+			{
+				if($key == "NUMBER"){
+					$max_number = max($max_number, $value);
+				}
+			}
+		}
+		
+		echo "max_number: $max_number<br>";
+		
+		// 以最大值更新一輪 NUMBER 再重新由 1 開始編碼，避免 NUMBER 重複 
+		$db->renumber();
+		echo "Renumber processing...<br>";
+		
+		$db->renumber();
+	}
+	
 	function update($post){
 		$params = array();
 		

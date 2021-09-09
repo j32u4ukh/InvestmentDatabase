@@ -26,7 +26,7 @@
 								 `VOL` INT(10) NOT NULL , 
 								 PRIMARY KEY (`TIME`(10))";
 			$this->sql_columns = array("TIME", "OPEN", "HIGH", "LOW", "CLOSE", "VOL");
-			$this->sort_by = "TIME";
+			$this->sort_by = array("TIME");
 			$this->primary_keys = array("TIME");
 			parent::getTable($this->table, $table_definition);
 		}

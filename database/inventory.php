@@ -24,7 +24,7 @@
 								 `PRICE` VARCHAR(10) NOT NULL , 
 								 PRIMARY KEY (`GUID`)";
 			$this->sql_columns = array("GUID", "TIME", "STOCK_ID", "PRICE");
-			$this->sort_by = "TIME";
+			$this->sort_by = array("TIME");
 			$this->primary_keys = array("GUID");
 			parent::getTable($this->table, $table_definition);
 		}

@@ -31,7 +31,7 @@
 								 PRIMARY KEY (`NUMBER`)";
 			$this->sql_columns = array("NUMBER", "STOCK_ID", "BUY_TIME", "SELL_TIME", "BUY_PRICE", "SELL_PRICE", "VOL", 
 									   "BUY_COST", "SELL_COST", "REVENUE");
-			$this->sort_by = "NUMBER";
+			$this->sort_by = array("SELL_TIME", "NUMBER");
 			$this->primary_keys = array("NUMBER");
 			
 			parent::getTable($this->table, $table_definition);

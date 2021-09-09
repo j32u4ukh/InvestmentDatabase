@@ -29,7 +29,7 @@
 								 
 			$this->sql_columns = array("NUMBER", "TIME", "USER", "TYPE", "FLOW", "STOCK", "REMARK");
 
-			$this->sort_by = "TIME";
+			$this->sort_by = array("TIME", "NUMBER");
 			$this->primary_keys = array("NUMBER");
 			parent::getTable($this->table, $table_definition);
 		}
