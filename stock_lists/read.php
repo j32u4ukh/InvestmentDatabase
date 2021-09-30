@@ -42,7 +42,7 @@
 				$datas = $db->tail($limit);
 				break;
 			case "all":
-				$datas = $db->query(array("where" => $sql_where, "sort_type" => $sort));
+				$datas = $db->read(array("where" => $sql_where, "sort_type" => $sort));
 				break;
 		}
 		

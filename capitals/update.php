@@ -1,11 +1,12 @@
 <?php
 	include_once ($_SERVER['DOCUMENT_ROOT'] . "/utils.php");
 	include_once ($_SERVER['DOCUMENT_ROOT'] . "/database/database.php");
-	include_once ($_SERVER['DOCUMENT_ROOT'] . "/database/trade_record.php");
+	include_once ($_SERVER['DOCUMENT_ROOT'] . "/database/capital.php");
 	
 	function renumber(){
-		$db = new TradeRecord();
-		// TODO: 取得最大 NUMBER
+		$db = new Capital();
+		
+		// 取得最大 NUMBER
 		$datas = $db->read();
 		$max_number = 0;
 				
@@ -31,36 +32,22 @@
 	function update($post){
 		$params = array();
 		
-		// primary _keys = array("STOCK_ID", "BUY_TIME", "SELL_TIME");
+		// primary _keys = array("NUMBER");
 		$number = $post["NUMBER"];
-		$stock_id = $post["STOCK_ID"];
-		$buy_time = $post["BUY_TIME"];
-		$sell_time = $post["SELL_TIME"];
-		
-		$params["STOCK_ID"] = $stock_id;
-		$params["BUY_TIME"] = $buy_time;
-		$params["SELL_TIME"] = $sell_time;
 		$params["NUMBER"] = $number;
 		
-		// array("BUY_PRICE", "SELL_PRICE", "VOL", "BUY_COST", "SELL_COST", "REVENUE");		
-		$params = updateParams($post, "BUY_PRICE", $params);
-		$params = updateParams($post, "SELL_PRICE", $params);
-		$params = updateParams($post, "VOL", $params);
-		$params = updateParams($post, "BUY_COST", $params);
-		$params = updateParams($post, "SELL_COST", $params);
-		$params = updateParams($post, "REVENUE", $params);
+		// array("TIME", "USER", "TYPE", "FLOW", "STOCK", "REMARK");		
+		$params = updateParams($post, "TIME", $params);
+		$params = updateParams($post, "USER", $params);
+		$params = updateParams($post, "TYPE", $params);
+		$params = updateParams($post, "FLOW", $params);
+		$params = updateParams($post, "STOCK", $params);
+		$params = updateParams($post, "REMARK", $params);
 		
-		$db = new TradeRecord();
+		$db = new Capital();
 		$db->update($params);
 		
-		$where = array();
-		$where[] = Database::sqlEq("STOCK_ID", "'" . $stock_id . "'");
-		$where[] = Database::sqlEq("BUY_TIME", "'" . $buy_time . "'");
-		$where[] = Database::sqlEq("SELL_TIME", "'" . $sell_time . "'");		
-		$where[] = Database::sqlEq("NUMBER", "'" . $number . "'");		
-		$sql_where = Database::sqlAnd($where);
-		
-		$datas = $db->query(array("where" => $sql_where));
+		$datas = $db->query(array("where" => Database::sqlEq("NUMBER", "'" . $number . "'")));
 		echo "<p class='api'>" . json_encode($datas) . "</p>";
 	}
 	
@@ -76,7 +63,7 @@
 	function updateMultiDatas($post){
 		$datas = json_decode($post["datas"], true);
 		
-		$db = new TradeRecord();
+		$db = new Capital();
 		$where = $db->updates($datas);
 		
 		$datas = $db->query(array("where" => $where));

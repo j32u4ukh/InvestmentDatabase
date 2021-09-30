@@ -42,6 +42,7 @@
 						}
 
 						break;
+						    
 					case "update":
 						$mode = $_POST["mode"];
 						

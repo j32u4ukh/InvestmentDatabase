@@ -48,7 +48,7 @@
 				$datas = $db->tail($limit);
 				break;
 			case "all":
-				$datas = $db->query(array("where" => $sql_where));
+				$datas = $db->read(array("where" => $sql_where));
 				break;
 		}
 		
