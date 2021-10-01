@@ -6,6 +6,8 @@
 	function add($post){
 		$db = new Capital();
 		
+		$number = $post["NUMBER"];
+		
 		$time = $post["TIME"];
 		$user = $post["USER"];
 		$type = $post["TYPE"];
@@ -15,7 +17,7 @@
 		$remark = $post["REMARK"];
 							
 		$datas = array(
-			array("TIME"=>"$time", "USER"=>"$user", "TYPE"=>"$type", 
+			array("NUMBER"=>"$number", "TIME"=>"$time", "USER"=>"$user", "TYPE"=>"$type", 
 				  "FLOW"=>"$flow", "STOCK"=>"$stock", "REMARK"=>"$remark")
 		);
 		
@@ -34,5 +36,5 @@
 		$result = $db->tail($n_data);
 						
 		echo "<p class='api'>" . json_encode($result) . "</p>";
-	}
+	}	
 ?>

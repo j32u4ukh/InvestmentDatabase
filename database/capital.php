@@ -18,7 +18,7 @@
 		}
 		
 		public function getTable($table=null, $table_definition=null){	
-			$table_definition = "`NUMBER` INT NOT NULL AUTO_INCREMENT , 
+			$table_definition = "`NUMBER` INT(10) NOT NULL, 
 								 `TIME` VARCHAR(10) NOT NULL ,
 								 `USER` VARCHAR(10) NOT NULL , 
 								 `TYPE` VARCHAR(10) NOT NULL , 
@@ -28,12 +28,12 @@
 								 PRIMARY KEY (`NUMBER`)";
 								 
 			$this->sql_columns = array("NUMBER", "TIME", "USER", "TYPE", "FLOW", "STOCK", "REMARK");
-
 			$this->sort_by = array("TIME", "NUMBER");
 			$this->primary_keys = array("NUMBER");
 			parent::getTable($this->table, $table_definition);
 		}
 		
+		/*
 		public function insertValues($data, $index){
 			// Capital 的第一個欄位為 auto increment，無須自己給值就會自動遞增，指令上要傳入 NULL
 			$temp = array("NULL");
@@ -56,5 +56,6 @@
 			
 			parent::insert($datas);
 		}
+		*/
 	}
 ?>
