@@ -2,6 +2,51 @@
 
 將投資相關數據獨立提供與維護
 
+## database/database.php
+
+封裝 SQL 指令，使指令呼叫更為便捷。
+
+```PHP
+// 高階 select 傳入參數為 array，使得參數使用更為彈性
+public function query($params = array()){
+	$columns = defaultMapValue($params, "colums", null);
+	$where = defaultMapValue($params, "where", null);
+	$sort_by = defaultMapValue($params, "sort_by", $this->sort_by);
+	$sort_type = defaultMapValue($params, "sort_type", "ASC");
+	$limit = defaultMapValue($params, "limit", null);
+	$offset = defaultMapValue($params, "offset", 0);
+
+	$results = $this->select(null, $columns, $where, $sort_by, $sort_type, $limit, $offset);			
+	$datas = array();
+
+	foreach($results as $result){
+		$data = array();
+
+		// 將欄位名稱對應的數據加入 $data
+		foreach($result as $key => $value){
+			if(in_array($key, $this->sql_columns, true)){
+				$data[$key] = $value;
+			}
+		}
+
+		// 將每一筆 $data 加入 $datas
+		$datas[] = $data;
+	}
+
+	return $datas;
+}
+```
+
+query 的使用情境如下：
+
+```PHP
+// 取得最前面 $limit 筆資料(預設取得所有欄位)
+$datas = $this->query(array("limit" => $limit, "sort_type" => "ASC"));
+
+// 取得最前面 $limit 筆資料(挑選 "ID", "PRICE" 欄位)
+$datas = $this->query(array("columns"=>{"ID", "PRICE"}, "limit" => $limit, "sort_type" => "ASC"));
+```
+
 ## PHP 筆記
 
 * 根據執行當下的網址路徑，影響了各腳本當中的相對路徑，因此改用 $_SERVER['DOCUMENT_ROOT'] 取得根目錄，再利用絕對路徑去指定檔案
